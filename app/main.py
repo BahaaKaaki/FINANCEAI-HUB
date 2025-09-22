@@ -24,12 +24,21 @@ async def lifespan(app: FastAPI):
     """Application lifespan manager."""
     # Startup
     from app.core.monitoring import get_performance_monitor
-    from app.database.connection import check_database_connection
+    from app.database.connection import check_database_connection, create_tables
     from app.core.logging import get_logger
 
     setup_logging()  # Initialize logging
     logger = get_logger(__name__)  # Get logger instance
     logger.info("Starting AI Financial Data System...")
+
+    # Initialize database tables
+    try:
+        logger.info("Creating database tables...")
+        create_tables()
+        logger.info("Database tables created/verified successfully")
+    except Exception as e:
+        logger.error("Failed to create database tables: %s", str(e))
+        # Don't fail startup, but log the error
 
     # Initialize performance monitoring
     try:
@@ -214,7 +223,7 @@ async def root():
 async def health():
     """Basic health check endpoint."""
     import time
-    
+
     try:
         # Simple health check without monitoring system
         return {
@@ -223,7 +232,7 @@ async def health():
             "version": "1.0.0",
             "timestamp": time.time(),
             "uptime_seconds": 0,  # Simplified for now
-            "message": "Service is running"
+            "message": "Service is running",
         }
     except Exception as e:
         return {

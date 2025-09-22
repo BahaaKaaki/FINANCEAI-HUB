@@ -8,7 +8,6 @@ from app.ai import get_financial_agent
 from app.ai.exceptions import FinancialAnalysisError, ValidationError
 from app.core.logging import get_logger
 from app.core.monitoring import record_request_duration, get_performance_monitor
-from app.core.circuit_breaker import CircuitBreakerOpenException
 
 logger = get_logger(__name__)
 
@@ -68,7 +67,9 @@ class QueryError(BaseModel):
 
 
 @router.post("/query", response_model=QueryResponse)
-async def process_natural_language_query(request: QueryRequest, http_request: Request) -> QueryResponse:
+async def process_natural_language_query(
+    request: QueryRequest, http_request: Request
+) -> QueryResponse:
     """
     Process a natural language query about financial data.
 
@@ -192,21 +193,25 @@ async def process_natural_language_query(request: QueryRequest, http_request: Re
     except ValidationError as e:
         processing_time = time.time() - start_time
         status_code = 400
-        
+
         logger.warning(
             "Validation error for query [%s] after %.3fs: %s",
             query_id,
             processing_time,
             str(e),
         )
-        
+
         # Record error metrics
-        monitor.record_counter("api.requests.error", 1.0, {
-            "endpoint": endpoint, 
-            "error_type": "validation_error",
-            "status_code": str(status_code)
-        })
-        
+        monitor.record_counter(
+            "api.requests.error",
+            1.0,
+            {
+                "endpoint": endpoint,
+                "error_type": "validation_error",
+                "status_code": str(status_code),
+            },
+        )
+
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail={
@@ -216,39 +221,12 @@ async def process_natural_language_query(request: QueryRequest, http_request: Re
             },
         )
 
-    except CircuitBreakerOpenException as e:
-        processing_time = time.time() - start_time
-        status_code = 503
-        
-        logger.warning(
-            "Circuit breaker open for query [%s] after %.3fs: %s",
-            query_id,
-            processing_time,
-            str(e),
-        )
-        
-        # Record circuit breaker metrics
-        monitor.record_counter("api.requests.circuit_breaker_open", 1.0, {"endpoint": endpoint})
-        
-        fallback_response = (
-            "The AI service is temporarily unavailable due to repeated failures. "
-            "Please try again in a few minutes."
-        )
-        
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail={
-                "error": "service_unavailable",
-                "message": "AI service is temporarily unavailable",
-                "details": {"query_id": query_id, "processing_time": processing_time},
-                "fallback_response": fallback_response,
-            },
-        )
+    # Circuit breaker exception handling removed for simplification
 
     except FinancialAnalysisError as e:
         processing_time = time.time() - start_time
         status_code = 422
-        
+
         logger.error(
             "Financial analysis error for query [%s] after %.3fs: %s",
             query_id,
@@ -257,11 +235,15 @@ async def process_natural_language_query(request: QueryRequest, http_request: Re
         )
 
         # Record error metrics
-        monitor.record_counter("api.requests.error", 1.0, {
-            "endpoint": endpoint,
-            "error_type": "analysis_error", 
-            "status_code": str(status_code)
-        })
+        monitor.record_counter(
+            "api.requests.error",
+            1.0,
+            {
+                "endpoint": endpoint,
+                "error_type": "analysis_error",
+                "status_code": str(status_code),
+            },
+        )
 
         # Provide fallback response for analysis errors
         fallback_response = _generate_fallback_response(request.query, str(e))
@@ -279,7 +261,7 @@ async def process_natural_language_query(request: QueryRequest, http_request: Re
     except Exception as e:
         processing_time = time.time() - start_time
         status_code = 500
-        
+
         logger.error(
             "Unexpected error processing query [%s] after %.3fs: %s",
             query_id,
@@ -289,11 +271,15 @@ async def process_natural_language_query(request: QueryRequest, http_request: Re
         )
 
         # Record error metrics
-        monitor.record_counter("api.requests.error", 1.0, {
-            "endpoint": endpoint,
-            "error_type": "internal_error",
-            "status_code": str(status_code)
-        })
+        monitor.record_counter(
+            "api.requests.error",
+            1.0,
+            {
+                "endpoint": endpoint,
+                "error_type": "internal_error",
+                "status_code": str(status_code),
+            },
+        )
 
         # Provide generic fallback response
         fallback_response = (
@@ -310,7 +296,7 @@ async def process_natural_language_query(request: QueryRequest, http_request: Re
                 "fallback_response": fallback_response,
             },
         )
-    
+
     finally:
         # Always record request duration
         processing_time = time.time() - start_time

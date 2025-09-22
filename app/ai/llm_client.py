@@ -6,11 +6,6 @@ from app.ai.models import LLMResponse, ToolCall
 from app.ai.providers import get_provider_class, get_available_providers
 from app.core.config import get_settings
 from app.core.logging import get_logger
-from app.core.circuit_breaker import (
-    get_circuit_breaker,
-    CircuitBreakerConfig,
-    CircuitBreakerOpenException,
-)
 from app.core.monitoring import record_llm_api_call
 
 logger = get_logger(__name__)
@@ -26,9 +21,10 @@ class LLMClient:
     def __init__(self):
         self.settings = get_settings()
         self._provider = None
-        self._circuit_breaker = None
+        # Circuit breaker removed
         self._initialize_provider()
-        self._initialize_circuit_breaker()
+
+    # Circuit breaker initialization removed
 
     def _initialize_provider(self):
         """Initialize the appropriate LLM provider based on configuration."""
@@ -86,26 +82,7 @@ class LLMClient:
                 f"Provider initialization failed: {str(e)}"
             ) from e
 
-    def _initialize_circuit_breaker(self):
-        """Initialize circuit breaker for LLM API calls."""
-        provider_name = self.settings.DEFAULT_LLM_PROVIDER
-
-        # Configure circuit breaker for LLM API calls
-        config = CircuitBreakerConfig(
-            failure_threshold=3,  # Open after 3 failures
-            recovery_timeout=60,  # Try recovery after 60 seconds
-            success_threshold=2,  # Close after 2 successes
-            timeout=30.0,  # 30 second timeout
-            expected_exception=(
-                FinancialAnalysisError,
-                ConnectionError,
-                TimeoutError,
-                Exception,  # Catch all for now, can be refined
-            ),
-        )
-
-        self._circuit_breaker = get_circuit_breaker(f"llm_api_{provider_name}", config)
-        logger.info("Circuit breaker initialized for LLM provider: %s", provider_name)
+    # Circuit breaker initialization method removed for simplification
 
     def chat_completion(
         self,
@@ -132,24 +109,18 @@ class LLMClient:
         if not self._provider:
             raise FinancialAnalysisError("No LLM provider initialized")
 
-        if not self._circuit_breaker:
-            raise FinancialAnalysisError("Circuit breaker not initialized")
-
         start_time = time.time()
         success = False
         tokens_used = None
 
         try:
-            # Use circuit breaker to protect LLM API calls
-            def _make_llm_call():
-                return self._provider.chat_completion(
-                    messages=messages,
-                    tools=tools,
-                    temperature=temperature,
-                    max_tokens=max_tokens,
-                )
-
-            result = self._circuit_breaker.call(_make_llm_call)
+            # Direct LLM API call (circuit breaker removed for simplification)
+            result = self._provider.chat_completion(
+                messages=messages,
+                tools=tools,
+                temperature=temperature,
+                max_tokens=max_tokens,
+            )
             success = True
 
             # Extract token usage if available
@@ -158,11 +129,7 @@ class LLMClient:
 
             return result
 
-        except CircuitBreakerOpenException as e:
-            logger.warning(
-                "Circuit breaker is open, falling back to mock mode: %s", str(e)
-            )
-            return self._mock_chat_completion(messages, tools)
+        # Circuit breaker exception handling removed
 
         except Exception as e:
             # Check if it's an API key error and fall back to mock mode

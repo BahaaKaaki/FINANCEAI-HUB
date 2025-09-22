@@ -414,10 +414,13 @@ class PerformanceMonitor:
             return
 
         def collect_system_metrics():
+            # Initialize CPU monitoring (non-blocking first call)
+            psutil.cpu_percent()  # First call to establish baseline
+            
             while self._system_metrics_enabled:
                 try:
-                    # CPU usage
-                    cpu_percent = psutil.cpu_percent(interval=1)
+                    # CPU usage (non-blocking after first call)
+                    cpu_percent = psutil.cpu_percent(interval=None)
                     self.record_gauge("system.cpu.usage_percent", cpu_percent)
 
                     # Memory usage
@@ -427,12 +430,12 @@ class PerformanceMonitor:
                         "system.memory.available_mb", memory.available / 1024 / 1024
                     )
 
-                    # Disk usage
-                    disk = psutil.disk_usage("/")
-                    self.record_gauge("system.disk.usage_percent", disk.percent)
-                    self.record_gauge(
-                        "system.disk.free_gb", disk.free / 1024 / 1024 / 1024
-                    )
+                    # Disk usage - temporarily disabled due to performance issues
+                    # disk = psutil.disk_usage("/")
+                    # self.record_gauge("system.disk.usage_percent", disk.percent)
+                    # self.record_gauge(
+                    #     "system.disk.free_gb", disk.free / 1024 / 1024 / 1024
+                    # )
 
                     # Process info
                     process = psutil.Process()
@@ -450,7 +453,6 @@ class PerformanceMonitor:
             target=collect_system_metrics, daemon=True, name="SystemMetricsCollector"
         )
         self._system_metrics_thread.start()
-
         logger.info("Started system metrics collection thread")
 
     def get_system_status(self) -> Dict[str, Any]:
@@ -536,13 +538,14 @@ def get_performance_monitor() -> PerformanceMonitor:
                 AlertSeverity.WARNING,
                 "High memory usage: {current_value:.1f}%",
             )
-            _performance_monitor.add_alert_rule(
-                "system.disk.usage_percent",
-                90.0,
-                "greater_than",
-                AlertSeverity.ERROR,
-                "High disk usage: {current_value:.1f}%",
-            )
+            # Temporarily disabled - disk usage alert was causing API timeouts
+            # _performance_monitor.add_alert_rule(
+            #     "system.disk.usage_percent",
+            #     90.0,
+            #     "greater_than",
+            #     AlertSeverity.ERROR,
+            #     "High disk usage: {current_value:.1f}%",
+            # )
 
         return _performance_monitor
 

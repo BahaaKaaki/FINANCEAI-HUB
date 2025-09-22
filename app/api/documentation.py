@@ -193,13 +193,9 @@ async def get_api_examples() -> List[APIExample]:
                         "model": "gpt-4",
                         "configured": True
                     },
-                    "circuit_breakers": {
+                    "monitoring": {
                         "status": "healthy",
-                        "count": 3,
-                        "details": {
-                            "llm_calls": {"state": "closed", "success_rate": 98.5},
-                            "database_operations": {"state": "closed", "success_rate": 99.8}
-                        }
+                        "message": "Circuit breakers removed for simplification"
                     }
                 }
             },

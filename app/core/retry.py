@@ -38,7 +38,7 @@ class RetryConfig:
     max_delay: float = 60.0  # Maximum delay in seconds
     backoff_strategy: BackoffStrategy = BackoffStrategy.EXPONENTIAL
     backoff_multiplier: float = 2.0
-    jitter: bool = True  # Add random jitter to prevent thundering herd
+    jitter: bool = True
     retry_on: Tuple[Type[Exception], ...] = (Exception,)
     stop_on: Tuple[Type[Exception], ...] = ()  # Exceptions that should not be retried
 
@@ -281,11 +281,11 @@ LLM_API_RETRY_CONFIG = RetryConfig(
     retry_on=(
         ConnectionError,
         TimeoutError,
-        # Add specific LLM API exceptions here
+        # We can add specific LLM API exceptions here if needed
     ),
     stop_on=(
         # Don't retry authentication errors
-        # Add specific non-retryable exceptions here
+        # We can add specific non-retryable exceptions here if needed
     ),
 )
 

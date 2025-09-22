@@ -2,7 +2,9 @@
 
 ## Overview
 
-The AI Financial Data System provides a comprehensive RESTful API for financial data processing, natural language querying, and AI-powered insights. All endpoints return JSON responses and follow REST conventions.
+The AI Financial Data System provides RESTful APIs for financial data processing, natural language querying, and AI-powered insights.
+
+All endpoints return JSON responses and follow REST conventions.
 
 ## Base URL
 
@@ -12,7 +14,7 @@ http://localhost:8000/api/v1
 
 ## Authentication
 
-Currently, the API does not require authentication. In production environments, implement appropriate authentication mechanisms.
+Currently, the API does not require authentication. In production environments, we need to implement appropriate authentication mechanisms.
 
 ## Response Format
 
@@ -79,7 +81,7 @@ Basic health check endpoint.
 
 ### GET /health/detailed
 
-Comprehensive health check with component status.
+Health check with component status.
 
 **Response:**
 ```json
@@ -887,12 +889,3 @@ Future versions will support WebSocket connections for:
 - Live conversation updates
 - Streaming AI responses
 - Real-time metrics
-
-## SDK Support
-
-Official SDKs are available for:
-- **Python**: `pip install financial-data-sdk`
-- **JavaScript**: `npm install @financial-data/sdk`
-- **Go**: `go get github.com/financial-data/go-sdk`
-
-This comprehensive API reference provides complete documentation for integrating with the AI Financial Data System.

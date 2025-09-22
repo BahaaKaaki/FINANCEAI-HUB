@@ -5,7 +5,6 @@ from app.ai.tools.anomaly_tools import detect_anomalies
 from app.ai.tools.comparison_tools import compare_financial_metrics
 from app.ai.tools.expense_tools import (
     analyze_expense_trends,
-    get_expense_categories,
     get_expenses_by_period,
 )
 from app.ai.tools.growth_tools import calculate_growth_rate
@@ -32,7 +31,6 @@ FINANCIAL_TOOLS = {
     "detect_anomalies": detect_anomalies,
     "get_expenses_by_period": get_expenses_by_period,
     "analyze_expense_trends": analyze_expense_trends,
-    "get_expense_categories": get_expense_categories,
     "analyze_seasonal_patterns": analyze_seasonal_patterns,
     "get_quarterly_performance": get_quarterly_performance,
     "generate_revenue_insights": generate_revenue_insights,

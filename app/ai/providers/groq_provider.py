@@ -37,7 +37,6 @@ class GroqProvider(BaseLLMProvider):
     ) -> LLMResponse:
         """Generate chat completion using Groq API."""
 
-        # Prepare request parameters
         request_params = {
             "model": self.model,
             "messages": messages,
@@ -45,7 +44,6 @@ class GroqProvider(BaseLLMProvider):
             "max_tokens": max_tokens or self.config.get("max_tokens", 4000),
         }
 
-        # Add tools if provided
         if tools:
             groq_tools = self.prepare_tools(tools)
             request_params["tools"] = groq_tools
@@ -57,7 +55,7 @@ class GroqProvider(BaseLLMProvider):
             # Make the API call
             response = self.client.chat.completions.create(**request_params)
 
-            # Parse response (same as OpenAI format)
+            # Parse response
             message = response.choices[0].message
             content = message.content
 

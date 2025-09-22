@@ -2,20 +2,15 @@
 
 ## Quick Deploy to Render.com
 
-### Option 1: One-Click Deploy (Recommended)
 1. Go to [Render.com](https://render.com) and sign up/login
-2. Click "New +" → "Web Service"
-3. Connect your GitHub account and select `BahaaKaaki/FinanceAI-Hub`
-4. Render will auto-detect the configuration from `render.yaml`
-
-### Option 2: Manual Setup
-1. **Create New Web Service**
+2. Connect your GitHub account and select `BahaaKaaki/FinanceAI-Hub`
+3. **Create New Web Service**
    - Name: `financeai-hub`
    - Environment: `Python 3`
    - Build Command: `pip install -r requirements.txt`
    - Start Command: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
 
-2. **Environment Variables** (Add in Render Dashboard)
+2. **Environment Variables** (Add in Render Dashboard or import from .env)
    ```
    DEBUG=false
    LOG_LEVEL=INFO
@@ -29,9 +24,9 @@
    REQUEST_TIMEOUT=30
    
    # Add your API keys (REQUIRED)
-   OPENAI_API_KEY=your_openai_key_here
-   GROQ_API_KEY=your_groq_key_here
-   ANTHROPIC_API_KEY=your_anthropic_key_here
+   OPENAI_API_KEY=openai_key
+   GROQ_API_KEY=groq_key
+   ANTHROPIC_API_KEY=anthropic_key
    ```
 
 ## Free Tier Limitations
@@ -101,9 +96,9 @@ git push origin master
 In Render dashboard, add these environment variables:
 
 **Required API Keys:**
-- `OPENAI_API_KEY` - Your OpenAI API key
-- `GROQ_API_KEY` - Your Groq API key  
-- `ANTHROPIC_API_KEY` - Your Anthropic API key
+- `OPENAI_API_KEY` - OpenAI API key
+- `GROQ_API_KEY` - Groq API key  
+- `ANTHROPIC_API_KEY` - Anthropic API key
 
 **Optional Configuration:**
 - `DEBUG=false`
@@ -217,11 +212,9 @@ When ready for production:
 
 ## Next Steps
 
-1. **Deploy and Test** - Get your app running
-2. **Add Authentication** - Secure your endpoints
+1. **Deploy and Test** - Get our app running (done on render)
+2. **Add Authentication** - Secure the endpoints
 3. **Database Upgrade** - Move to PostgreSQL
 4. **Monitoring** - Add error tracking (Sentry)
 5. **CI/CD** - Automate deployments
 6. **Custom Domain** - Professional appearance
-
-Your FinanceAI-Hub is now ready for deployment! 🚀

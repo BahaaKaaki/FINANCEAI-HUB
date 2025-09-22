@@ -60,7 +60,7 @@ class RequestMonitoringMiddleware(BaseHTTPMiddleware):
         )
 
         response = None
-        status_code = 500  # Default to error in case of exception
+        status_code = 500
 
         try:
             # Process request

@@ -48,9 +48,6 @@ class QueryResponse(BaseModel):
     query_metadata: Dict[str, Any] = Field(
         ..., description="Metadata about query processing"
     )
-    suggestions: Optional[List[str]] = Field(
-        None, description="Suggested follow-up questions or clarifications"
-    )
 
 
 class QueryError(BaseModel):
@@ -164,9 +161,6 @@ async def process_natural_language_query(
             ),
         }
 
-        # Generate suggestions for follow-up questions
-        suggestions = _generate_suggestions(request.query, agent_result)
-
         # Log successful processing
         logger.info(
             "Query processed successfully [%s]: %.3fs, %d tools, %d iterations",
@@ -187,7 +181,6 @@ async def process_natural_language_query(
             supporting_data=supporting_data,
             conversation_id=agent_result.get("conversation_id"),
             query_metadata=query_metadata,
-            suggestions=suggestions,
         )
 
     except ValidationError as e:
@@ -369,61 +362,6 @@ def _format_supporting_data(
 
     return supporting_data
 
-
-def _generate_suggestions(query: str, agent_result: Dict[str, Any]) -> List[str]:
-    """
-    Generate suggested follow-up questions based on the query and results.
-
-    Args:
-        query: Original user query
-        agent_result: Result from agent processing
-
-    Returns:
-        List of suggested follow-up questions
-    """
-    suggestions = []
-
-    # Extract context from the query and results
-    query_lower = query.lower()
-    data_used = agent_result.get("data_used", {})
-
-    # Suggest time-based follow-ups
-    if any(keyword in query_lower for keyword in ["revenue", "profit", "income"]):
-        suggestions.extend(
-            [
-                "What were the main drivers of this revenue performance?",
-                "How does this compare to the same period last year?",
-                "What are the revenue trends over the last 6 months?",
-            ]
-        )
-
-    if any(keyword in query_lower for keyword in ["expense", "cost", "spending"]):
-        suggestions.extend(
-            [
-                "Which expense categories changed the most?",
-                "What are the largest expense categories?",
-                "How do expenses compare to budget?",
-            ]
-        )
-
-    if any(keyword in query_lower for keyword in ["compare", "vs", "versus"]):
-        suggestions.extend(
-            [
-                "What factors contributed to these differences?",
-                "Are there any seasonal patterns in this data?",
-                "What trends do you see over a longer time period?",
-            ]
-        )
-
-    # Suggest based on data sources accessed
-    sources = data_used.get("sources_accessed", [])
-    if "quickbooks" in sources and "rootfi" not in sources:
-        suggestions.append("How does this compare to Rootfi data?")
-    elif "rootfi" in sources and "quickbooks" not in sources:
-        suggestions.append("How does this compare to QuickBooks data?")
-
-    # Limit to 3 most relevant suggestions
-    return suggestions[:3]
 
 
 def _generate_fallback_response(query: str, error_message: str) -> str:

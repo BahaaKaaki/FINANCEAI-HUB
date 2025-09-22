@@ -162,7 +162,7 @@ async def get_financial_data(
 
     try:
         with get_db_session() as session:
-            # Build base query
+
             query = session.query(FinancialRecordDB)
 
             # Apply filters
@@ -427,7 +427,7 @@ async def get_accounts(
 
     try:
         with get_db_session() as session:
-            # Build base query
+
             query = session.query(AccountDB)
 
             # Apply filters
@@ -460,7 +460,6 @@ async def get_accounts(
             # Execute query
             db_accounts = query.all()
 
-            # Convert to Pydantic models
             accounts = []
             for db_account in db_accounts:
                 account = Account(

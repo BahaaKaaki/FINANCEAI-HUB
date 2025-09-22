@@ -56,7 +56,6 @@ class ConversationContext(BaseModel):
 
     def add_tool_response(self, tool_name: str, tool_call_id: str, result: Any) -> None:
         """Add a tool response to the conversation."""
-        # Convert result to JSON string for storage
         content = json.dumps(result, default=str, indent=2)
         message = ConversationMessage(
             role="tool", content=content, tool_call_id=tool_call_id, name=tool_name

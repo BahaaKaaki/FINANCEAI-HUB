@@ -27,7 +27,6 @@ class FinancialAgent:
         self.conversation_manager: ConversationManager = get_conversation_manager()
         self.system_prompt = self._build_system_prompt()
 
-        # Validate configuration
         if not self.llm_client.validate_configuration():
             raise FinancialAnalysisError(
                 "LLM client is not properly configured. Please check API keys."
@@ -124,7 +123,7 @@ Remember: Users want immediate, actionable insights. Be decisive, use smart defa
         )
 
         try:
-            # Create or get conversation context
+
             if conversation_id is None:
                 conversation_id = self.conversation_manager.create_conversation()
 
@@ -135,14 +134,11 @@ Remember: Users want immediate, actionable insights. Be decisive, use smart defa
                 )
                 context = self.conversation_manager.get_conversation(conversation_id)
 
-            # Add user message to conversation
             context.add_user_message(query)
 
-            # Prepare messages for LLM
             messages = [{"role": "system", "content": self.system_prompt}]
             messages.extend(context.get_messages_for_llm(max_messages=10))
 
-            # Get available tools
             tools = get_financial_tool_schemas()
 
             # Track tool calls and iterations
@@ -153,12 +149,10 @@ Remember: Users want immediate, actionable insights. Be decisive, use smart defa
                 iteration += 1
                 logger.debug("Agent iteration %d/%d", iteration, max_iterations)
 
-                # Get LLM response
                 llm_response = self.llm_client.chat_completion(
                     messages=messages, tools=tools
                 )
 
-                # Add assistant message to conversation
                 assistant_tool_calls = None
                 if llm_response.tool_calls:
                     assistant_tool_calls = [
@@ -177,7 +171,6 @@ Remember: Users want immediate, actionable insights. Be decisive, use smart defa
                     content=llm_response.content, tool_calls=assistant_tool_calls
                 )
 
-                # Add assistant message to LLM messages
                 assistant_message = {"role": "assistant"}
                 if llm_response.content:
                     assistant_message["content"] = llm_response.content
@@ -307,23 +300,19 @@ Remember: Users want immediate, actionable insights. Be decisive, use smart defa
 
             summary["tools_used"].append(tool_name)
 
-            # Extract date ranges
             if "start_date" in args and "end_date" in args:
                 date_range = f"{args['start_date']} to {args['end_date']}"
                 if date_range not in summary["date_ranges_analyzed"]:
                     summary["date_ranges_analyzed"].append(date_range)
 
-            # Extract metrics
             if "metric" in args:
                 summary["metrics_analyzed"].add(args["metric"])
             if "metrics" in args:
                 summary["metrics_analyzed"].update(args["metrics"])
 
-            # Extract sources
             if "source" in args and args["source"]:
                 summary["sources_accessed"].add(args["source"])
 
-        # Convert sets to lists for JSON serialization
         summary["metrics_analyzed"] = list(summary["metrics_analyzed"])
         summary["sources_accessed"] = list(summary["sources_accessed"])
 

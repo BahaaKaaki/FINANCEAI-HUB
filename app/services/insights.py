@@ -16,8 +16,8 @@ class InsightsService:
 
     def __init__(self):
         self.llm_client = get_llm_client()
-        self._cache = {}  # Simple in-memory cache
-        self._cache_ttl = 3600  # 1 hour cache TTL
+        self._cache = {}
+        self._cache_ttl = 3600
 
     def _get_cache_key(self, insight_type: str, **params) -> str:
         """Generate cache key for insights."""
@@ -79,7 +79,7 @@ class InsightsService:
                         "revenue": float(record.revenue) if record.revenue else 0.0,
                         "expenses": float(record.expenses) if record.expenses else 0.0,
                         "net_profit": float(record.net_profit) if record.net_profit else 0.0,
-                        "account_details": "",  # Simplified for now
+                        "account_details": "",
                     }
                     results.append(record_dict)
 
@@ -97,7 +97,6 @@ class InsightsService:
             "revenue_trends", start_date=start_date, end_date=end_date, source=source
         )
 
-        # Check cache first
         cached_result = self._get_from_cache(cache_key)
         if cached_result:
             return cached_result
@@ -186,7 +185,7 @@ class InsightsService:
             # Parse AI response (simplified - in production, you'd want more robust parsing)
             ai_content = response.content or "Unable to generate insights."
 
-            # Extract key findings and recommendations (simplified parsing)
+            # Extract key findings and recommendations
             lines = ai_content.split("\n")
             narrative = ""
             key_findings = []
@@ -253,7 +252,6 @@ class InsightsService:
             "expense_analysis", start_date=start_date, end_date=end_date, source=source
         )
 
-        # Check cache first
         cached_result = self._get_from_cache(cache_key)
         if cached_result:
             return cached_result
@@ -428,7 +426,6 @@ class InsightsService:
             "cash_flow", start_date=start_date, end_date=end_date, source=source
         )
 
-        # Check cache first
         cached_result = self._get_from_cache(cache_key)
         if cached_result:
             return cached_result

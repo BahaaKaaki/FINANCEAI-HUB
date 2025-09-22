@@ -28,8 +28,7 @@ This guide covers deploying the AI Financial Data System in various environments
 
 1. **Clone the Repository**
 ```bash
-git clone <repository-url>
-cd ai-financial-data-system
+git clone <https://github.com/BahaaKaaki/FinanceAI-Hub>
 ```
 
 2. **Create Virtual Environment**
@@ -55,9 +54,11 @@ cp .env.example .env
 
 # Edit .env file with your configuration
 # Required: At least one LLM provider API key
-OPENAI_API_KEY=your_openai_api_key_here
+OPENAI_API_KEY=openai_api_key
 # OR
-ANTHROPIC_API_KEY=your_anthropic_api_key_here
+ANTHROPIC_API_KEY=anthropic_api_key
+# OR
+GROQ_API_KEY=groq_api_key
 ```
 
 5. **Initialize Database**
@@ -94,7 +95,7 @@ DATABASE_ECHO=true
 
 # LLM Configuration
 DEFAULT_LLM_PROVIDER=openai
-OPENAI_API_KEY=your_key_here
+OPENAI_API_KEY=key_here
 OPENAI_MODEL=gpt-4o-mini
 TEMPERATURE=0.1
 
@@ -150,7 +151,7 @@ docker build -t ai-financial-data-system .
 docker run -d \
   --name financial-data-api \
   -p 8000:8000 \
-  -e OPENAI_API_KEY=your_key_here \
+  -e OPENAI_API_KEY=ey_here \
   -e DATABASE_URL=sqlite:///./data/financial_data.db \
   -v $(pwd)/data:/app/data \
   ai-financial-data-system
@@ -227,8 +228,8 @@ volumes:
 2. **Create .env file**
 ```bash
 # .env for Docker Compose
-OPENAI_API_KEY=your_key_here
-POSTGRES_PASSWORD=secure_password_here
+OPENAI_API_KEY=key_here
+POSTGRES_PASSWORD=secure_password
 ```
 
 3. **Deploy with Docker Compose**
@@ -1045,4 +1046,4 @@ if __name__ == "__main__":
     monitor_resources()
 ```
 
-This comprehensive deployment guide provides everything needed to deploy the AI Financial Data System in various environments, from development to production-scale deployments.
+This deployment guide provides everything needed to deploy the AI Financial Data System in various environments, from development to production-scale deployments (Note that we only cover local and render deployments for now)

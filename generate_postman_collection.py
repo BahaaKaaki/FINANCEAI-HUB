@@ -1,0 +1,673 @@
+#!/usr/bin/env python3
+"""
+Generate the latest comprehensive Postman collection for the AI Financial Data System API.
+Updated to reflect current API structure after cleanup.
+"""
+
+import json
+from typing import Dict, List, Any
+
+def create_postman_collection() -> Dict[str, Any]:
+    """Create the complete Postman collection structure."""
+    
+    collection = {
+        "info": {
+            "name": "AI Financial Data System - Latest API Collection",
+            "description": "Latest comprehensive Postman collection for the AI Financial Data System (Kudwa Assignment). Includes all current endpoints with examples and tests.",
+            "version": "2.0.0",
+            "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+        },
+        "variable": [
+            {"key": "baseUrl", "value": "http://localhost:8000", "type": "string", "description": "API base URL"},
+            {"key": "apiVersion", "value": "v1", "type": "string", "description": "API version"},
+            {"key": "conversationId", "value": "", "type": "string", "description": "AI conversation context ID"},
+            {"key": "batchId", "value": "", "type": "string", "description": "Data ingestion batch ID"},
+            {"key": "accountId", "value": "qb_revenue_001", "type": "string", "description": "Sample account ID"},
+            {"key": "sampleStartDate", "value": "2024-01-01", "type": "string", "description": "Sample start date"},
+            {"key": "sampleEndDate", "value": "2024-06-30", "type": "string", "description": "Sample end date"}
+        ],
+        "auth": {"type": "noauth"},
+        "event": [
+            {
+                "listen": "prerequest",
+                "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                        "// Set timestamp for requests",
+                        "pm.globals.set('timestamp', new Date().toISOString());",
+                        "",
+                        "// Generate conversation ID if not set",
+                        "if (!pm.collectionVariables.get('conversationId')) {",
+                        "    pm.collectionVariables.set('conversationId', 'conv_' + Date.now());",
+                        "}",
+                        "",
+                        "// Log request info",
+                        "console.log('Request:', pm.request.method, pm.request.url.toString());"
+                    ]
+                }
+            },
+            {
+                "listen": "test",
+                "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                        "// Global tests for all requests",
+                        "pm.test('Response time is acceptable', function () {",
+                        "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                        "});",
+                        "",
+                        "pm.test('No server errors (5xx)', function () {",
+                        "    pm.expect(pm.response.code).to.be.below(500);",
+                        "});",
+                        "",
+                        "if (pm.response.headers.get('Content-Type') && pm.response.headers.get('Content-Type').includes('application/json')) {",
+                        "    pm.test('Response is valid JSON', function () {",
+                        "        pm.response.to.be.json;",
+                        "    });",
+                        "}"
+                    ]
+                }
+            }
+        ],
+        "item": []
+    }
+    
+    # Add current endpoint groups (removed ai_agent and documentation as they were deleted)
+    collection["item"].extend([
+        create_health_endpoints(),
+        create_natural_language_endpoints(),  # Main AI feature
+        create_financial_data_endpoints(),
+        create_data_ingestion_endpoints(),
+        create_ai_insights_endpoints()  # Optional B feature
+    ])
+    
+    return collection
+
+def create_health_endpoints() -> Dict[str, Any]:
+    """Create health and monitoring endpoints."""
+    return {
+        "name": "❤️ Health & Monitoring",
+        "description": "System health checks and monitoring endpoints",
+        "item": [
+            {
+                "name": "Root Health Check",
+                "request": {
+                    "method": "GET",
+                    "header": [{"key": "Accept", "value": "application/json"}],
+                    "url": {
+                        "raw": "{{baseUrl}}/health",
+                        "host": ["{{baseUrl}}"],
+                        "path": ["health"]
+                    },
+                    "description": "Basic health check endpoint from main app"
+                },
+                "event": [
+                    {
+                        "listen": "test",
+                        "script": {
+                            "type": "text/javascript",
+                            "exec": [
+                                "pm.test('Status code is 200', function () {",
+                                "    pm.response.to.have.status(200);",
+                                "});",
+                                "pm.test('Has status field', function () {",
+                                "    const jsonData = pm.response.json();",
+                                "    pm.expect(jsonData).to.have.property('status');",
+                                "});"
+                            ]
+                        }
+                    }
+                ]
+            },
+            {
+                "name": "Quick Health Check",
+                "request": {
+                    "method": "GET",
+                    "header": [{"key": "Accept", "value": "application/json"}],
+                    "url": {
+                        "raw": "{{baseUrl}}/api/{{apiVersion}}/health/quick",
+                        "host": ["{{baseUrl}}"],
+                        "path": ["api", "{{apiVersion}}", "health", "quick"]
+                    },
+                    "description": "Quick health check for load balancers"
+                }
+            },
+            {
+                "name": "Comprehensive Health Check",
+                "request": {
+                    "method": "GET",
+                    "header": [{"key": "Accept", "value": "application/json"}],
+                    "url": {
+                        "raw": "{{baseUrl}}/api/{{apiVersion}}/health",
+                        "host": ["{{baseUrl}}"],
+                        "path": ["api", "{{apiVersion}}", "health"]
+                    },
+                    "description": "Comprehensive health check with database, LLM, and monitoring status"
+                }
+            },
+            {
+                "name": "System Metrics",
+                "request": {
+                    "method": "GET",
+                    "header": [{"key": "Accept", "value": "application/json"}],
+                    "url": {
+                        "raw": "{{baseUrl}}/api/{{apiVersion}}/metrics",
+                        "host": ["{{baseUrl}}"],
+                        "path": ["api", "{{apiVersion}}", "metrics"]
+                    },
+                    "description": "System performance metrics and monitoring data"
+                }
+            },
+            {
+                "name": "Database Health",
+                "request": {
+                    "method": "GET",
+                    "header": [{"key": "Accept", "value": "application/json"}],
+                    "url": {
+                        "raw": "{{baseUrl}}/api/{{apiVersion}}/health/database",
+                        "host": ["{{baseUrl}}"],
+                        "path": ["api", "{{apiVersion}}", "health", "database"]
+                    },
+                    "description": "Detailed database health check"
+                }
+            },
+            {
+                "name": "LLM Service Health",
+                "request": {
+                    "method": "GET",
+                    "header": [{"key": "Accept", "value": "application/json"}],
+                    "url": {
+                        "raw": "{{baseUrl}}/api/{{apiVersion}}/health/llm",
+                        "host": ["{{baseUrl}}"],
+                        "path": ["api", "{{apiVersion}}", "health", "llm"]
+                    },
+                    "description": "LLM service configuration and health check"
+                }
+            }
+        ]
+    }
+
+def create_financial_data_endpoints() -> Dict[str, Any]:
+    """Create financial data endpoints."""
+    return {
+        "name": "📊 Financial Data",
+        "description": "Access to structured financial records and accounts",
+        "item": [
+            {
+                "name": "Get All Financial Data",
+                "request": {
+                    "method": "GET",
+                    "header": [{"key": "Accept", "value": "application/json"}],
+                    "url": {
+                        "raw": "{{baseUrl}}/api/{{apiVersion}}/financial-data?page=1&page_size=10",
+                        "host": ["{{baseUrl}}"],
+                        "path": ["api", "{{apiVersion}}", "financial-data"],
+                        "query": [
+                            {"key": "page", "value": "1"},
+                            {"key": "page_size", "value": "10"},
+                            {"key": "source", "value": "quickbooks", "disabled": True},
+                            {"key": "period_start", "value": "2024-01-01", "disabled": True},
+                            {"key": "period_end", "value": "2024-03-31", "disabled": True}
+                        ]
+                    }
+                }
+            },
+            {
+                "name": "Get Financial Data by Period",
+                "request": {
+                    "method": "GET",
+                    "header": [{"key": "Accept", "value": "application/json"}],
+                    "url": {
+                        "raw": "{{baseUrl}}/api/{{apiVersion}}/financial-data/2024-Q1",
+                        "host": ["{{baseUrl}}"],
+                        "path": ["api", "{{apiVersion}}", "financial-data", "2024-Q1"]
+                    }
+                }
+            },
+            {
+                "name": "Get Accounts",
+                "request": {
+                    "method": "GET",
+                    "header": [{"key": "Accept", "value": "application/json"}],
+                    "url": {
+                        "raw": "{{baseUrl}}/api/{{apiVersion}}/financial-data/accounts/",
+                        "host": ["{{baseUrl}}"],
+                        "path": ["api", "{{apiVersion}}", "financial-data", "accounts", ""]
+                    }
+                }
+            }
+        ]
+    }
+
+def create_natural_language_endpoints() -> Dict[str, Any]:
+    """Create natural language query endpoints - MAIN AI FEATURE."""
+    return {
+        "name": "🎯 Natural Language AI Queries (MANDATORY)",
+        "description": "AI-powered natural language processing for financial queries - Core Assignment Feature A",
+        "item": [
+            {
+                "name": "Revenue Query Example",
+                "request": {
+                    "method": "POST",
+                    "header": [
+                        {"key": "Content-Type", "value": "application/json"},
+                        {"key": "Accept", "value": "application/json"}
+                    ],
+                    "body": {
+                        "mode": "raw",
+                        "raw": json.dumps({
+                            "query": "What was the total revenue in Q3 2024?",
+                            "conversation_id": "{{conversationId}}",
+                            "max_iterations": 5,
+                            "include_raw_data": False
+                        }, indent=2)
+                    },
+                    "url": {
+                        "raw": "{{baseUrl}}/api/{{apiVersion}}/query",
+                        "host": ["{{baseUrl}}"],
+                        "path": ["api", "{{apiVersion}}", "query"]
+                    },
+                    "description": "Example: Ask about revenue for a specific period"
+                },
+                "event": [
+                    {
+                        "listen": "test",
+                        "script": {
+                            "type": "text/javascript",
+                            "exec": [
+                                "pm.test('Status code is 200', function () {",
+                                "    pm.response.to.have.status(200);",
+                                "});",
+                                "",
+                                "if (pm.response.code === 200) {",
+                                "    const response = pm.response.json();",
+                                "    pm.test('Response has answer', function () {",
+                                "        pm.expect(response).to.have.property('answer');",
+                                "    });",
+                                "    pm.test('Response has conversation_id', function () {",
+                                "        pm.expect(response).to.have.property('conversation_id');",
+                                "    });",
+                                "    // Save conversation ID for follow-up queries",
+                                "    pm.collectionVariables.set('conversationId', response.conversation_id);",
+                                "}"
+                            ]
+                        }
+                    }
+                ]
+            },
+            {
+                "name": "Expense Analysis Query",
+                "request": {
+                    "method": "POST",
+                    "header": [
+                        {"key": "Content-Type", "value": "application/json"},
+                        {"key": "Accept", "value": "application/json"}
+                    ],
+                    "body": {
+                        "mode": "raw",
+                        "raw": json.dumps({
+                            "query": "Which expense categories had the highest increase this year?",
+                            "conversation_id": "{{conversationId}}",
+                            "max_iterations": 5
+                        }, indent=2)
+                    },
+                    "url": {
+                        "raw": "{{baseUrl}}/api/{{apiVersion}}/query",
+                        "host": ["{{baseUrl}}"],
+                        "path": ["api", "{{apiVersion}}", "query"]
+                    },
+                    "description": "Example: Analyze expense patterns and trends"
+                }
+            },
+            {
+                "name": "Comparative Analysis Query",
+                "request": {
+                    "method": "POST",
+                    "header": [
+                        {"key": "Content-Type", "value": "application/json"},
+                        {"key": "Accept", "value": "application/json"}
+                    ],
+                    "body": {
+                        "mode": "raw",
+                        "raw": json.dumps({
+                            "query": "Compare Q1 and Q2 2024 performance",
+                            "conversation_id": "{{conversationId}}",
+                            "max_iterations": 5
+                        }, indent=2)
+                    },
+                    "url": {
+                        "raw": "{{baseUrl}}/api/{{apiVersion}}/query",
+                        "host": ["{{baseUrl}}"],
+                        "path": ["api", "{{apiVersion}}", "query"]
+                    },
+                    "description": "Example: Compare performance across periods"
+                }
+            },
+            {
+                "name": "Trend Analysis Query",
+                "request": {
+                    "method": "POST",
+                    "header": [
+                        {"key": "Content-Type", "value": "application/json"},
+                        {"key": "Accept", "value": "application/json"}
+                    ],
+                    "body": {
+                        "mode": "raw",
+                        "raw": json.dumps({
+                            "query": "Show me revenue trends for 2024 and identify seasonal patterns",
+                            "conversation_id": "{{conversationId}}",
+                            "max_iterations": 7
+                        }, indent=2)
+                    },
+                    "url": {
+                        "raw": "{{baseUrl}}/api/{{apiVersion}}/query",
+                        "host": ["{{baseUrl}}"],
+                        "path": ["api", "{{apiVersion}}", "query"]
+                    },
+                    "description": "Example: Complex trend analysis with seasonal patterns"
+                }
+            },
+            {
+                "name": "Follow-up Conversation Query",
+                "request": {
+                    "method": "POST",
+                    "header": [
+                        {"key": "Content-Type", "value": "application/json"},
+                        {"key": "Accept", "value": "application/json"}
+                    ],
+                    "body": {
+                        "mode": "raw",
+                        "raw": json.dumps({
+                            "query": "What were the main drivers of this performance?",
+                            "conversation_id": "{{conversationId}}",
+                            "max_iterations": 5
+                        }, indent=2)
+                    },
+                    "url": {
+                        "raw": "{{baseUrl}}/api/{{apiVersion}}/query",
+                        "host": ["{{baseUrl}}"],
+                        "path": ["api", "{{apiVersion}}", "query"]
+                    },
+                    "description": "Example: Follow-up question using conversation context"
+                }
+            }
+        ]
+    }
+
+def create_ai_insights_endpoints() -> Dict[str, Any]:
+    """Create AI insights endpoints - Optional Feature B."""
+    return {
+        "name": "🧠 AI Insights & Analytics (OPTIONAL B)",
+        "description": "AI-generated insights and business recommendations - Optional Assignment Feature B",
+        "item": [
+            {
+                "name": "Revenue Trends Insight",
+                "request": {
+                    "method": "GET",
+                    "header": [{"key": "Accept", "value": "application/json"}],
+                    "url": {
+                        "raw": "{{baseUrl}}/api/{{apiVersion}}/insights/revenue-trends?start_date={{sampleStartDate}}&end_date={{sampleEndDate}}",
+                        "host": ["{{baseUrl}}"],
+                        "path": ["api", "{{apiVersion}}", "insights", "revenue-trends"],
+                        "query": [
+                            {"key": "start_date", "value": "{{sampleStartDate}}", "description": "Start date (YYYY-MM-DD)"},
+                            {"key": "end_date", "value": "{{sampleEndDate}}", "description": "End date (YYYY-MM-DD)"},
+                            {"key": "source", "value": "quickbooks", "description": "Optional source filter", "disabled": True}
+                        ]
+                    },
+                    "description": "Generate AI-powered revenue trend analysis and insights"
+                }
+            },
+            {
+                "name": "Expense Analysis Insight",
+                "request": {
+                    "method": "GET",
+                    "header": [{"key": "Accept", "value": "application/json"}],
+                    "url": {
+                        "raw": "{{baseUrl}}/api/{{apiVersion}}/insights/expense-analysis?start_date={{sampleStartDate}}&end_date={{sampleEndDate}}",
+                        "host": ["{{baseUrl}}"],
+                        "path": ["api", "{{apiVersion}}", "insights", "expense-analysis"],
+                        "query": [
+                            {"key": "start_date", "value": "{{sampleStartDate}}"},
+                            {"key": "end_date", "value": "{{sampleEndDate}}"},
+                            {"key": "source", "value": "rootfi", "description": "Optional source filter", "disabled": True}
+                        ]
+                    },
+                    "description": "Generate AI-powered expense analysis and cost optimization insights"
+                }
+            },
+            {
+                "name": "Cash Flow Insights",
+                "request": {
+                    "method": "GET",
+                    "header": [{"key": "Accept", "value": "application/json"}],
+                    "url": {
+                        "raw": "{{baseUrl}}/api/{{apiVersion}}/insights/cash-flow?start_date={{sampleStartDate}}&end_date={{sampleEndDate}}",
+                        "host": ["{{baseUrl}}"],
+                        "path": ["api", "{{apiVersion}}", "insights", "cash-flow"],
+                        "query": [
+                            {"key": "start_date", "value": "{{sampleStartDate}}"},
+                            {"key": "end_date", "value": "{{sampleEndDate}}"}
+                        ]
+                    },
+                    "description": "Generate cash flow analysis and financial health insights"
+                }
+            },
+            {
+                "name": "Seasonal Patterns Analysis",
+                "request": {
+                    "method": "GET",
+                    "header": [{"key": "Accept", "value": "application/json"}],
+                    "url": {
+                        "raw": "{{baseUrl}}/api/{{apiVersion}}/insights/seasonal-patterns?metric=revenue&years[]=2023&years[]=2024",
+                        "host": ["{{baseUrl}}"],
+                        "path": ["api", "{{apiVersion}}", "insights", "seasonal-patterns"],
+                        "query": [
+                            {"key": "metric", "value": "revenue", "description": "Metric to analyze (revenue/expenses/net_profit)"},
+                            {"key": "years[]", "value": "2023", "description": "Years to analyze"},
+                            {"key": "years[]", "value": "2024"},
+                            {"key": "source", "value": "quickbooks", "description": "Optional source filter", "disabled": True}
+                        ]
+                    },
+                    "description": "Analyze seasonal patterns and cyclical trends across multiple years"
+                }
+            },
+            {
+                "name": "Quarterly Performance Analysis",
+                "request": {
+                    "method": "GET",
+                    "header": [{"key": "Accept", "value": "application/json"}],
+                    "url": {
+                        "raw": "{{baseUrl}}/api/{{apiVersion}}/insights/quarterly/2024?metric=revenue",
+                        "host": ["{{baseUrl}}"],
+                        "path": ["api", "{{apiVersion}}", "insights", "quarterly", "2024"],
+                        "query": [
+                            {"key": "metric", "value": "revenue", "description": "Financial metric to analyze"},
+                            {"key": "source", "value": "quickbooks", "description": "Optional source filter", "disabled": True}
+                        ]
+                    },
+                    "description": "Generate quarterly performance insights for a specific year"
+                }
+            },
+            {
+                "name": "Insights Summary",
+                "request": {
+                    "method": "GET",
+                    "header": [{"key": "Accept", "value": "application/json"}],
+                    "url": {
+                        "raw": "{{baseUrl}}/api/{{apiVersion}}/insights/summary",
+                        "host": ["{{baseUrl}}"],
+                        "path": ["api", "{{apiVersion}}", "insights", "summary"]
+                    },
+                    "description": "Get summary of available insights and cache statistics"
+                }
+            },
+            {
+                "name": "Clear Insights Cache",
+                "request": {
+                    "method": "DELETE",
+                    "header": [{"key": "Accept", "value": "application/json"}],
+                    "url": {
+                        "raw": "{{baseUrl}}/api/{{apiVersion}}/insights/cache",
+                        "host": ["{{baseUrl}}"],
+                        "path": ["api", "{{apiVersion}}", "insights", "cache"]
+                    },
+                    "description": "Clear insights cache to force fresh analysis"
+                }
+            }
+        ]
+    }
+
+def create_data_ingestion_endpoints() -> Dict[str, Any]:
+    """Create data ingestion endpoints."""
+    return {
+        "name": "📥 Data Ingestion",
+        "description": "Endpoints for ingesting and processing financial data from QuickBooks and RootFi sources",
+        "item": [
+            {
+                "name": "Ingest Single File",
+                "request": {
+                    "method": "POST",
+                    "header": [
+                        {"key": "Content-Type", "value": "application/json"},
+                        {"key": "Accept", "value": "application/json"}
+                    ],
+                    "body": {
+                        "mode": "raw",
+                        "raw": json.dumps({
+                            "file_path": "data_set_1.json",
+                            "source_type": "quickbooks"
+                        }, indent=2)
+                    },
+                    "url": {
+                        "raw": "{{baseUrl}}/api/{{apiVersion}}/ingestion/file",
+                        "host": ["{{baseUrl}}"],
+                        "path": ["api", "{{apiVersion}}", "ingestion", "file"]
+                    },
+                    "description": "Ingest a single financial data file (QuickBooks or RootFi format)"
+                },
+                "event": [
+                    {
+                        "listen": "test",
+                        "script": {
+                            "type": "text/javascript",
+                            "exec": [
+                                "pm.test('Status code is 200', function () {",
+                                "    pm.response.to.have.status(200);",
+                                "});",
+                                "if (pm.response.code === 200) {",
+                                "    const response = pm.response.json();",
+                                "    pm.test('Response has status', function () {",
+                                "        pm.expect(response).to.have.property('status');",
+                                "    });",
+                                "    pm.test('Response has records processed', function () {",
+                                "        pm.expect(response).to.have.property('records_processed');",
+                                "    });",
+                                "}"
+                            ]
+                        }
+                    }
+                ]
+            },
+            {
+                "name": "Batch Ingestion (Both Datasets)",
+                "request": {
+                    "method": "POST",
+                    "header": [
+                        {"key": "Content-Type", "value": "application/json"},
+                        {"key": "Accept", "value": "application/json"}
+                    ],
+                    "body": {
+                        "mode": "raw",
+                        "raw": json.dumps({
+                            "file_paths": ["data_set_1.json", "data_set_2.json"]
+                        }, indent=2)
+                    },
+                    "url": {
+                        "raw": "{{baseUrl}}/api/{{apiVersion}}/ingestion/batch",
+                        "host": ["{{baseUrl}}"],
+                        "path": ["api", "{{apiVersion}}", "ingestion", "batch"]
+                    },
+                    "description": "Process both QuickBooks and RootFi datasets in batch"
+                },
+                "event": [
+                    {
+                        "listen": "test",
+                        "script": {
+                            "type": "text/javascript",
+                            "exec": [
+                                "if (pm.response.code === 200) {",
+                                "    const response = pm.response.json();",
+                                "    pm.collectionVariables.set('batchId', response.batch_id);",
+                                "}"
+                            ]
+                        }
+                    }
+                ]
+            },
+            {
+                "name": "Async Batch Ingestion",
+                "request": {
+                    "method": "POST",
+                    "header": [
+                        {"key": "Content-Type", "value": "application/json"},
+                        {"key": "Accept", "value": "application/json"}
+                    ],
+                    "body": {
+                        "mode": "raw",
+                        "raw": json.dumps({
+                            "file_paths": ["data_set_1.json", "data_set_2.json"]
+                        }, indent=2)
+                    },
+                    "url": {
+                        "raw": "{{baseUrl}}/api/{{apiVersion}}/ingestion/batch/async",
+                        "host": ["{{baseUrl}}"],
+                        "path": ["api", "{{apiVersion}}", "ingestion", "batch", "async"]
+                    },
+                    "description": "Process files asynchronously in background"
+                }
+            },
+            {
+                "name": "Check Ingestion Status",
+                "request": {
+                    "method": "GET",
+                    "header": [{"key": "Accept", "value": "application/json"}],
+                    "url": {
+                        "raw": "{{baseUrl}}/api/{{apiVersion}}/ingestion/status?batch_id={{batchId}}",
+                        "host": ["{{baseUrl}}"],
+                        "path": ["api", "{{apiVersion}}", "ingestion", "status"],
+                        "query": [
+                            {"key": "batch_id", "value": "{{batchId}}", "description": "Optional batch ID"}
+                        ]
+                    },
+                    "description": "Check status of ingestion operations"
+                }
+            },
+            {
+                "name": "Ingestion Service Health",
+                "request": {
+                    "method": "GET",
+                    "header": [{"key": "Accept", "value": "application/json"}],
+                    "url": {
+                        "raw": "{{baseUrl}}/api/{{apiVersion}}/ingestion/health",
+                        "host": ["{{baseUrl}}"],
+                        "path": ["api", "{{apiVersion}}", "ingestion", "health"]
+                    },
+                    "description": "Health check for ingestion service"
+                }
+            }
+        ]
+    }
+
+
+
+if __name__ == "__main__":
+    collection = create_postman_collection()
+    
+    # Write to file
+    with open("AI_Financial_System_Complete_Collection.json", "w") as f:
+        json.dump(collection, f, indent=2)
+    
+    print("✅ Complete Postman collection generated successfully!")
+    print("📁 File: AI_Financial_System_Complete_Collection.json")
+    print("🚀 Import this file into Postman to get started")

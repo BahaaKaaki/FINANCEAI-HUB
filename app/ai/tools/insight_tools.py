@@ -1,16 +1,8 @@
-"""
-AI tools for generating financial insights.
-
-This module provides tools that the AI agent can use to generate
-intelligent insights about financial data, including revenue trends,
-expense analysis, cash flow patterns, and seasonal analysis.
-"""
-
 from typing import Any, Dict, List, Optional
 
-from app.services.insights import get_insights_service
 from app.ai.exceptions import FinancialAnalysisError
 from app.core.logging import get_logger
+from app.services.insights import get_insights_service
 
 logger = get_logger(__name__)
 

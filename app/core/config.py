@@ -99,5 +99,4 @@ def get_settings() -> Settings:
     return _settings
 
 
-# For backward compatibility
 settings = get_settings()

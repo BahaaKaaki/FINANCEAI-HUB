@@ -37,10 +37,8 @@ class AnthropicProvider(BaseLLMProvider):
     ) -> LLMResponse:
         """Generate chat completion using Anthropic Claude API."""
 
-        # Convert messages to Anthropic format
         anthropic_messages = self._convert_messages(messages)
 
-        # Prepare request parameters
         request_params = {
             "model": self.model,
             "messages": anthropic_messages,
@@ -104,17 +102,14 @@ class AnthropicProvider(BaseLLMProvider):
             role = message.get("role")
             content = message.get("content")
 
-            # Skip system messages (handled separately in Anthropic)
             if role == "system":
                 continue
 
-            # Convert assistant messages with tool calls
             if role == "assistant" and "tool_calls" in message:
                 # Add assistant message
                 if content:
                     anthropic_messages.append({"role": "assistant", "content": content})
 
-                # Add tool use blocks
                 tool_content = []
                 for tool_call in message["tool_calls"]:
                     tool_content.append(
@@ -131,7 +126,6 @@ class AnthropicProvider(BaseLLMProvider):
                         {"role": "assistant", "content": tool_content}
                     )
 
-            # Convert tool response messages
             elif role == "tool":
                 anthropic_messages.append(
                     {
@@ -146,7 +140,6 @@ class AnthropicProvider(BaseLLMProvider):
                     }
                 )
 
-            # Convert regular user/assistant messages
             elif role in ["user", "assistant"] and content:
                 anthropic_messages.append({"role": role, "content": content})
 

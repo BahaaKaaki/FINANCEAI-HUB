@@ -18,18 +18,14 @@ class StructuredFormatter(logging.Formatter):
 
     def format(self, record):
         """Format log record with structured information."""
-        # Ensure message uses %s formatting
         if hasattr(record, "args") and record.args:
             try:
-                # Use %s formatting for performance
                 record.msg = str(record.msg) % record.args
                 record.args = None
             except (TypeError, ValueError) as e:
-                # Fallback if formatting fails
                 record.msg = f"{record.msg} (formatting error: {e})"
                 record.args = None
 
-        # Create structured log entry
         log_entry = {
             "timestamp": datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z'),
             "level": record.levelname,
@@ -40,16 +36,13 @@ class StructuredFormatter(logging.Formatter):
             "line": record.lineno,
         }
 
-        # Add thread information if available
         if hasattr(record, "thread") and record.thread:
             log_entry["thread_id"] = record.thread
             log_entry["thread_name"] = getattr(record, "threadName", "Unknown")
 
-        # Add process information if available
         if hasattr(record, "process") and record.process:
             log_entry["process_id"] = record.process
 
-        # Add exception information if present
         if record.exc_info:
             log_entry["exception"] = {
                 "type": record.exc_info[0].__name__ if record.exc_info[0] else None,
@@ -57,7 +50,6 @@ class StructuredFormatter(logging.Formatter):
                 "traceback": traceback.format_exception(*record.exc_info),
             }
 
-        # Add extra fields if present
         extra_fields = {}
         for key, value in record.__dict__.items():
             if key not in {
@@ -128,12 +120,10 @@ def setup_logging():
     logging.getLogger("httpx").setLevel(logging.WARNING)
     logging.getLogger("urllib3").setLevel(logging.WARNING)
 
-    # Add custom filter to ensure %s formatting
     class PerformanceLoggingFilter(logging.Filter):
-        """Filter to ensure proper %s formatting and add performance context."""
+        """Filter to ensure proper formatting and add performance context."""
 
         def filter(self, record):
-            # Add performance context if available
             try:
                 import threading
 
@@ -141,13 +131,10 @@ def setup_logging():
             except:
                 pass
 
-            # Validate %s formatting usage
             if hasattr(record, "args") and record.args:
                 try:
-                    # Test if message can be formatted with %s
                     test_msg = str(record.msg) % record.args
                 except (TypeError, ValueError):
-                    # Log warning about improper formatting
                     logger = logging.getLogger("logging.formatter")
                     logger.warning(
                         "Improper log formatting detected in %s:%d - use %%s formatting",
@@ -172,8 +159,7 @@ def setup_logging():
 
     # Initialize performance monitoring integration
     try:
-        from app.core.monitoring import get_performance_monitor
-
+        from app.core.monitoring import get_performance_monitor  
         monitor = get_performance_monitor()
 
         # Add logging metrics
@@ -194,7 +180,7 @@ def setup_logging():
                         monitor.record_counter("logging.warnings", 1.0)
 
                 except Exception:
-                    pass  # Don't let monitoring break logging
+                    pass
 
         # Add metrics handler
         metrics_handler = LoggingMetricsHandler()

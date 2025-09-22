@@ -35,7 +35,6 @@ class OpenAIProvider(BaseLLMProvider):
     ) -> LLMResponse:
         """Generate chat completion using OpenAI API."""
 
-        # Prepare request parameters
         request_params = {
             "model": self.model,
             "messages": messages,
@@ -43,7 +42,6 @@ class OpenAIProvider(BaseLLMProvider):
             "max_tokens": max_tokens or self.config.get("max_tokens", 4000),
         }
 
-        # Add tools if provided
         if tools:
             openai_tools = self.prepare_tools(tools)
             request_params["tools"] = openai_tools

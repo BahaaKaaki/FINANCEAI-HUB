@@ -15,7 +15,7 @@ class LLMClient:
     """
     Unified client for LLM providers with function calling support.
 
-    Uses a modular provider system to support multiple LLM services.
+    Supports multiple LLM services.
     """
 
     def __init__(self):
@@ -31,7 +31,6 @@ class LLMClient:
         try:
             provider_class = get_provider_class(provider_name)
 
-            # Get provider-specific configuration
             if provider_name == "openai":
                 if not self.settings.OPENAI_API_KEY:
                     raise FinancialAnalysisError(
@@ -110,7 +109,7 @@ class LLMClient:
         tokens_used = None
 
         try:
-            # Direct LLM API call
+
             result = self._provider.chat_completion(
                 messages=messages,
                 tools=tools,
@@ -119,27 +118,16 @@ class LLMClient:
             )
             success = True
 
-            # Extract token usage if available
             if hasattr(result, "usage") and result.usage:
                 tokens_used = getattr(result.usage, "total_tokens", None)
 
             return result
 
         except Exception as e:
-            # Check if it's an API key error and fall back to mock mode
-            if (
-                "401" in str(e)
-                or "invalid_api_key" in str(e)
-                or "Incorrect API key" in str(e)
-            ):
-                logger.warning("Invalid API key detected, falling back to mock mode")
-                return self._mock_chat_completion(messages, tools)
-
             logger.error("LLM chat completion failed: %s", str(e))
             raise FinancialAnalysisError(f"LLM request failed: {str(e)}") from e
 
         finally:
-            # Record performance metrics
             duration = time.time() - start_time
             provider_name = self.settings.DEFAULT_LLM_PROVIDER
             model_name = (
@@ -156,70 +144,6 @@ class LLMClient:
                 tokens_used=tokens_used,
             )
 
-    def _mock_chat_completion(
-        self,
-        messages: List[Dict[str, str]],
-        tools: Optional[List[Dict[str, Any]]] = None,
-    ) -> LLMResponse:
-        """
-        Generate a mock chat completion for testing without valid API keys.
-        """
-        # Simulate processing time
-        time.sleep(0.3)
-
-        # Get the user's query from messages
-        user_query = ""
-        for message in reversed(messages):
-            if message.get("role") == "user":
-                user_query = message.get("content", "").lower()
-                break
-
-        # Simulate tool calls based on query content
-        tool_calls = []
-        if tools and any(
-            keyword in user_query
-            for keyword in ["revenue", "profit", "income", "sales"]
-        ):
-            # Simulate a revenue analysis tool call
-            tool_calls.append(
-                ToolCall(
-                    name="analyze_revenue_trends",
-                    arguments={
-                        "start_date": "2024-01-01",
-                        "end_date": "2024-03-31",
-                        "metric": "revenue",
-                    },
-                    call_id="call_mock_revenue_001",
-                )
-            )
-
-        if tools and any(
-            keyword in user_query for keyword in ["expense", "cost", "spending"]
-        ):
-            # Simulate an expense analysis tool call
-            tool_calls.append(
-                ToolCall(
-                    name="analyze_expense_trends",
-                    arguments={
-                        "start_date": "2024-01-01",
-                        "end_date": "2024-03-31",
-                        "category": "all",
-                    },
-                    call_id="call_mock_expense_001",
-                )
-            )
-
-        # Generate mock response content
-        if "revenue" in user_query or "profit" in user_query:
-            content = "🤖 **[DEMO MODE]** Based on the financial data analysis, I can see that revenue for Q1 2024 was $125,000, representing a 15% increase compared to the previous quarter. This growth was primarily driven by strong sales performance in the technology sector."
-        elif "expense" in user_query or "cost" in user_query:
-            content = "🤖 **[DEMO MODE]** The expense analysis shows that total expenses for the requested period were $85,000. The largest expense categories were payroll (45%) and operational costs (30%), with a notable 8% increase in marketing expenses."
-        elif "compare" in user_query:
-            content = "🤖 **[DEMO MODE]** Comparing the two periods, I can see significant improvements in key metrics. Revenue increased by 12% while expenses only grew by 5%, resulting in a 25% improvement in net profit margin."
-        else:
-            content = f"🤖 **[DEMO MODE]** I've analyzed your financial data query: '{user_query[:50]}...'. Based on the available information, here are the key insights from your financial records. Note: This is a demo response since no valid OpenAI API key is configured."
-
-        return LLMResponse(content=content, tool_calls=tool_calls, finish_reason="stop")
 
     def validate_configuration(self) -> bool:
         """

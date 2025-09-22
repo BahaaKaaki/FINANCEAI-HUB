@@ -1,51 +1,49 @@
+import time
 from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.ai_agent import router as ai_agent_router
-from app.api.documentation import router as documentation_router
 from app.api.financial_data import router as financial_data_router
 from app.api.health import router as health_router
 from app.api.ingestion import router as ingestion_router
 from app.api.insights import router as insights_router
 from app.api.query import router as query_router
 from app.core.config import settings
-from app.core.logging import setup_logging
+from app.core.logging import get_logger, setup_logging
 from app.core.middleware import (
-    RequestMonitoringMiddleware,
     ErrorHandlingMiddleware,
     PerformanceMiddleware,
+    RequestMonitoringMiddleware,
     SecurityHeadersMiddleware,
+)
+from app.core.monitoring import get_performance_monitor
+from app.database.connection import (
+    check_database_connection,
+    cleanup_database_connections,
+    create_tables,
 )
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan manager."""
-    # Startup
-    from app.core.monitoring import get_performance_monitor
-    from app.database.connection import check_database_connection, create_tables
-    from app.core.logging import get_logger
 
-    setup_logging()  # Initialize logging
-    logger = get_logger(__name__)  # Get logger instance
+    setup_logging()
+    logger = get_logger(__name__)
     logger.info("Starting AI Financial Data System...")
 
-    # Initialize database tables
     try:
         logger.info("Creating database tables...")
         create_tables()
         logger.info("Database tables created/verified successfully")
     except Exception as e:
         logger.error("Failed to create database tables: %s", str(e))
-        # Don't fail startup, but log the error
 
-    # Initialize performance monitoring
     try:
         monitor = get_performance_monitor()
         logger.info("Performance monitoring initialized")
 
-        # Register health checks
         def database_health_check():
             from app.core.monitoring import HealthCheck
             import time
@@ -82,10 +80,6 @@ async def lifespan(app: FastAPI):
 
     yield
 
-    # Shutdown
-    from app.core.monitoring import get_performance_monitor
-    from app.database.connection import cleanup_database_connections
-
     logger.info("Shutting down AI Financial Data System...")
 
     try:
@@ -120,12 +114,12 @@ language querying and intelligent financial insights.
 
 ### Key Features
 
-* **Multi-Source Data Integration**: Seamlessly process QuickBooks and Rootfi financial data
-* **Natural Language Queries**: Ask questions about your financial data in plain English
+* **Multi-Source Data Integration**: Process QuickBooks and Rootfi financial data
+* **Natural Language Queries**: Ask questions about financial data in plain English
 * **AI-Powered Insights**: Get intelligent analysis and recommendations
 * **RESTful API**: Clean, well-documented endpoints for all operations
-* **Real-time Health Monitoring**: Comprehensive system health and performance metrics
-* **Data Validation**: Robust validation and quality assurance for financial accuracy
+* **Real-time Health Monitoring**: System health and performance metrics
+* **Data Validation**: Validation and quality assurance for financial accuracy
 
 ### Getting Started
 
@@ -137,7 +131,7 @@ language querying and intelligent financial insights.
 ### Authentication
 
 Currently, this API does not require authentication. In production environments,
-implement appropriate authentication and authorization mechanisms.
+we will need to implement appropriate authentication and authorization mechanisms.
 
 ### Rate Limiting
 
@@ -147,12 +141,12 @@ ensure system stability.
 ### Support
 
 For technical support or questions about the API, please refer to the documentation
-or contact the development team.
+or contact the development team (Bahaa Kaaki - kaakibahaa99@gmail.com)
     """,
     version="1.0.0",
     contact={
         "name": "AI Financial Data System Team",
-        "email": "support@example.com",
+        "email": "kaakibahaa99@gmail.com",
     },
     license_info={
         "name": "MIT License",
@@ -189,13 +183,11 @@ or contact the development team.
     ],
 )
 
-# Add middleware (order matters - first added is outermost)
 app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(PerformanceMiddleware, slow_request_threshold=5.0)
 app.add_middleware(ErrorHandlingMiddleware)
 app.add_middleware(RequestMonitoringMiddleware)
 
-# Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS,
@@ -207,10 +199,8 @@ app.add_middleware(
 app.include_router(health_router, prefix="/api/v1")
 app.include_router(ingestion_router, prefix="/api/v1")
 app.include_router(financial_data_router, prefix="/api/v1")
-app.include_router(ai_agent_router, prefix="/api/v1")
 app.include_router(query_router, prefix="/api/v1")
 app.include_router(insights_router, prefix="/api/v1")
-app.include_router(documentation_router, prefix="/api/v1/docs")
 
 
 @app.get("/")
@@ -222,7 +212,6 @@ async def root():
 @app.get("/health")
 async def health():
     """Basic health check endpoint."""
-    import time
 
     try:
         # Simple health check without monitoring system

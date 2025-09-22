@@ -538,7 +538,7 @@ def get_performance_monitor() -> PerformanceMonitor:
                 AlertSeverity.WARNING,
                 "High memory usage: {current_value:.1f}%",
             )
-            # Temporarily disabled - disk usage alert was causing API timeouts
+            # Temporarily disabled - cz disk usage alert was causing API timeouts
             # _performance_monitor.add_alert_rule(
             #     "system.disk.usage_percent",
             #     90.0,

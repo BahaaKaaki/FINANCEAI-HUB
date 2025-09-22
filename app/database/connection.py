@@ -75,7 +75,7 @@ def create_database_engine(database_url: Optional[str] = None) -> Engine:
     # Configure engine with connection pooling
     engine_kwargs = {
         "echo": settings.database_echo,
-        "future": True,  # Use SQLAlchemy 2.0 style
+        "future": True,
     }
 
     # SQLite-specific configuration

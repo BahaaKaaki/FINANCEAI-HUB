@@ -378,14 +378,14 @@ async def _process_batch_async(
             result.files_failed,
         )
 
-        # In a production system, you might want to:
+        # In a production system, we might want to:
         # 1. Store the result in a cache/database for later retrieval
         # 2. Send notifications about completion
         # 3. Trigger downstream processes
 
     except Exception as e:
         logger.error("Async batch processing failed: batch_id=%s, error=%s", batch_id, str(e))
-        # In a production system, you might want to:
+        # In a production system, we might want to:
         # 1. Store the error for later retrieval
         # 2. Send error notifications
         # 3. Implement retry logic

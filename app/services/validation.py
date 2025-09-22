@@ -467,7 +467,7 @@ class FinancialDataValidator:
     ) -> None:
         """Check for missing account values that might be expected."""
 
-        # This is a basic check - in a real system, you might have
+        # This is a basic check - in a real system, we might have
         # business rules about which accounts are required
 
         account_ids_with_values = {av.account_id for av in account_values}

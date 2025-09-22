@@ -158,7 +158,7 @@ async def health_check():
         "status": overall_status,
         "timestamp": time.time(),
         "version": "1.0.0",
-        "uptime_seconds": 0,  # Could be calculated from app start time
+        "uptime_seconds": 0,  # Could be calculated from app start time (for later)
         "checks": checks,
     }
 
@@ -182,7 +182,7 @@ async def get_system_metrics():
         elif not llm_configured:
             system_status = "degraded"
 
-        # Get performance metrics (simplified to avoid timeouts)
+        # Get performance metrics
         performance_metrics = {
             "database_healthy": db_healthy,
             "llm_configured": llm_configured,
@@ -197,7 +197,7 @@ async def get_system_metrics():
                 "llm_service": "healthy" if llm_configured else "degraded",
             },
             "performance_metrics": performance_metrics,
-            "alerts": [],  # Could be populated with actual alerts
+            "alerts": [],  # Could be populated with actual alerts (later on)
         }
 
     except Exception as e:

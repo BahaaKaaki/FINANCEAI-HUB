@@ -31,10 +31,9 @@ def analyze_seasonal_patterns(
 
     try:
         with get_db_session() as session:
-            # Build base query
+
             query = session.query(FinancialRecordDB)
 
-            # Apply filters
             if source:
                 query = query.filter(FinancialRecordDB.source == source)
 
@@ -47,7 +46,6 @@ def analyze_seasonal_patterns(
                     )
                 query = query.filter(func.or_(*year_filters))
 
-            # Execute query
             records = query.all()
 
             if not records:

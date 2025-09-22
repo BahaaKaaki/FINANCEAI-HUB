@@ -2,7 +2,7 @@
 
 ## Overview
 
-The AI Financial Data System is a comprehensive platform built with modern Python technologies, designed for scalability, maintainability, and intelligent financial data processing. The system follows a modular architecture with clear separation of concerns.
+The AI Financial Data System is a platform built with modern Python technologies, designed for scalability, maintainability, and intelligent financial data processing. The system follows a modular architecture with clear separation of concerns.
 
 ## Architecture Diagram
 
@@ -55,7 +55,7 @@ The AI Financial Data System is a comprehensive platform built with modern Pytho
 - Async/await support for high performance
 - Automatic OpenAPI documentation generation
 - Request validation with Pydantic
-- Comprehensive error handling
+- Error handling
 - Health monitoring integration
 
 ### 2. API Endpoints (`app/api/`)
@@ -90,12 +90,6 @@ The AI Financial Data System is a comprehensive platform built with modern Pytho
 - Cash flow insights
 - Seasonal pattern detection
 
-#### AI Agent Tools (`app/api/ai_agent.py`)
-- Direct tool access
-- Tool registry management
-- Agent status monitoring
-- Conversation handling
-
 ### 3. AI System (`app/ai/`)
 
 #### Core AI Components
@@ -112,7 +106,7 @@ The AI Financial Data System is a comprehensive platform built with modern Pytho
 - **Insight Tools**: AI-powered insight generation
 
 #### LLM Providers (`app/ai/providers/`)
-- **OpenAI Provider**: GPT-4 and GPT-3.5 integration
+- **OpenAI Provider**: GPT-4 and GPT-4 integration
 - **Anthropic Provider**: Claude model support
 - **Groq Provider**: Fast inference with open models
 - **Base Provider**: Abstract interface for extensibility
@@ -127,7 +121,7 @@ The AI Financial Data System is a comprehensive platform built with modern Pytho
 
 #### Services (`app/services/`)
 - **Ingestion Service**: Orchestrates data processing pipeline
-- **Validation Service**: Comprehensive data quality checks
+- **Validation Service**: Ddata quality checks
 - **Normalization Service**: Unified data model conversion
 - **Insights Service**: AI-powered insight generation
 
@@ -228,7 +222,7 @@ Recommendation Creation → Response Formatting → Caching
 - **Alembic**: Database migration management
 
 ### AI & Machine Learning
-- **OpenAI API**: GPT-4 and GPT-3.5 for natural language processing
+- **OpenAI API**: GPT-5 and GPT-4 for natural language processing
 - **Anthropic API**: Claude models for advanced reasoning
 - **Groq API**: Fast inference for open-source models
 
@@ -295,7 +289,7 @@ Recommendation Creation → Response Formatting → Caching
 - **Local Development**: SQLite database with hot reload
 - **Environment Configuration**: `.env` file for local settings
 - **Debug Mode**: Enhanced logging and error reporting
-- **Test Suite**: Comprehensive testing with coverage reporting
+- **Test Suite**: Testing with coverage reporting
 
 ### Production Considerations
 - **Database**: PostgreSQL for production workloads
@@ -307,7 +301,7 @@ Recommendation Creation → Response Formatting → Caching
 - **Environment-based**: Different configs for dev/staging/production
 - **Secret Management**: Secure handling of API keys and credentials
 - **Feature Flags**: Configurable feature enablement
-- **Health Checks**: Comprehensive health monitoring for deployment
+- **Health Checks**: Hhealth monitoring for deployment
 
 ## Extension Points
 

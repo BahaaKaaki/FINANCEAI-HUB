@@ -2,6 +2,7 @@ from datetime import date, datetime
 from decimal import Decimal
 from typing import Any, Dict, List
 
+from app.core.config import get_settings
 from app.core.logging import get_logger
 from app.database.connection import check_database_connection, get_db_session
 from app.database.migrations import initialize_database
@@ -24,18 +25,15 @@ def setup_database() -> bool:
         True if setup was successful, False otherwise
     """
     try:
-        from app.core.config import get_settings
 
         settings = get_settings()
 
         logger.info("Starting database setup...")
 
-        # Check database connection
         if not check_database_connection():
             logger.error("Database connection failed")
             return False
 
-        # Initialize database with migrations
         if not initialize_database():
             logger.error("Database initialization failed")
             return False

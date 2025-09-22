@@ -232,31 +232,6 @@ def get_financial_tool_schemas() -> List[Dict[str, Any]]:
             },
         },
         {
-            "name": "get_expense_categories",
-            "description": "Get expense breakdown by categories to identify spending patterns.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "start_date": {
-                        "type": "string",
-                        "description": "Start date in YYYY-MM-DD format",
-                        "pattern": r"^\d{4}-\d{2}-\d{2}$",
-                    },
-                    "end_date": {
-                        "type": "string",
-                        "description": "End date in YYYY-MM-DD format",
-                        "pattern": r"^\d{4}-\d{2}-\d{2}$",
-                    },
-                    "source": {
-                        "type": "string",
-                        "description": "Optional data source filter",
-                        "enum": ["quickbooks", "rootfi"],
-                    },
-                },
-                "required": ["start_date", "end_date"],
-            },
-        },
-        {
             "name": "analyze_seasonal_patterns",
             "description": "Analyze seasonal patterns in financial data to identify cyclical trends.",
             "parameters": {

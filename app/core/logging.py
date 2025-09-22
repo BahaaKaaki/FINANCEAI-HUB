@@ -27,7 +27,7 @@ class StructuredFormatter(logging.Formatter):
                 record.args = None
 
         log_entry = {
-            "timestamp": datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z'),
+            "timestamp": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
             "level": record.levelname,
             "logger": record.name,
             "message": record.getMessage(),
@@ -159,7 +159,8 @@ def setup_logging():
 
     # Initialize performance monitoring integration
     try:
-        from app.core.monitoring import get_performance_monitor  
+        from app.core.monitoring import get_performance_monitor
+
         monitor = get_performance_monitor()
 
         # Add logging metrics

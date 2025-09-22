@@ -12,12 +12,12 @@ from .financial import (
 
 __all__ = [
     "FinancialRecord",
-    "Account", 
+    "Account",
     "AccountValue",
     "FinancialRecordCreate",
     "AccountCreate",
     "AccountValueCreate",
     "FinancialRecordFilter",
     "SourceType",
-    "AccountType"
+    "AccountType",
 ]

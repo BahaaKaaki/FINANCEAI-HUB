@@ -3,7 +3,14 @@ from decimal import Decimal
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel, Field, ValidationInfo, field_validator, validator, ConfigDict
+from pydantic import (
+    BaseModel,
+    Field,
+    ValidationInfo,
+    field_validator,
+    validator,
+    ConfigDict,
+)
 
 from app.core.logging import get_logger
 
@@ -47,10 +54,12 @@ class FinancialRecord(BaseModel):
         None, description="Original raw data for audit trail"
     )
     created_at: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc), description="Record creation timestamp"
+        default_factory=lambda: datetime.now(timezone.utc),
+        description="Record creation timestamp",
     )
     updated_at: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc), description="Record last update timestamp"
+        default_factory=lambda: datetime.now(timezone.utc),
+        description="Record last update timestamp",
     )
 
     @field_validator("period_end")
@@ -102,10 +111,12 @@ class Account(BaseModel):
     description: Optional[str] = Field(None, description="Optional account description")
     is_active: bool = Field(True, description="Whether the account is currently active")
     created_at: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc), description="Account creation timestamp"
+        default_factory=lambda: datetime.now(timezone.utc),
+        description="Account creation timestamp",
     )
     updated_at: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc), description="Account last update timestamp"
+        default_factory=lambda: datetime.now(timezone.utc),
+        description="Account last update timestamp",
     )
 
     @field_validator("name")
@@ -135,9 +146,7 @@ class Account(BaseModel):
             raise ValueError("account cannot be its own parent")
         return v
 
-    model_config = ConfigDict(
-        arbitrary_types_allowed=True
-    )
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
 class AccountValue(BaseModel):
@@ -156,12 +165,11 @@ class AccountValue(BaseModel):
         ..., description="Monetary value for this account in this period"
     )
     created_at: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc), description="Value record creation timestamp"
+        default_factory=lambda: datetime.now(timezone.utc),
+        description="Value record creation timestamp",
     )
 
-    model_config = ConfigDict(
-        arbitrary_types_allowed=True
-    )
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
 # Request/Response models for API endpoints

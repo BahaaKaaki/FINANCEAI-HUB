@@ -416,7 +416,7 @@ class PerformanceMonitor:
         def collect_system_metrics():
             # Initialize CPU monitoring (non-blocking first call)
             psutil.cpu_percent()  # First call to establish baseline
-            
+
             while self._system_metrics_enabled:
                 try:
                     # CPU usage (non-blocking after first call)

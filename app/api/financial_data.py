@@ -61,7 +61,9 @@ class PeriodSummary(BaseModel):
     sources: List[str]
 
 
-@router.get("/", response_model=FinancialDataResponse, summary="Retrieve Financial Records")
+@router.get(
+    "/", response_model=FinancialDataResponse, summary="Retrieve Financial Records"
+)
 async def get_financial_data(
     # Pagination parameters
     page: int = Query(1, ge=1, description="Page number (1-based)"),

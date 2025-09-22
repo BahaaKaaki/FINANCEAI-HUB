@@ -56,16 +56,16 @@ class InsightsService:
         try:
             with get_db_session() as session:
                 from app.database.models import FinancialRecordDB
-                
+
                 # Query financial records within date range
                 query = session.query(FinancialRecordDB).filter(
                     FinancialRecordDB.period_start >= start_date,
-                    FinancialRecordDB.period_end <= end_date
+                    FinancialRecordDB.period_end <= end_date,
                 )
-                
+
                 if source:
                     query = query.filter(FinancialRecordDB.source == source)
-                
+
                 records = query.order_by(FinancialRecordDB.period_start).all()
 
                 results = []
@@ -73,12 +73,20 @@ class InsightsService:
                     record_dict = {
                         "id": record.id,
                         "source": record.source,
-                        "period_start": record.period_start.isoformat() if record.period_start else None,
-                        "period_end": record.period_end.isoformat() if record.period_end else None,
+                        "period_start": (
+                            record.period_start.isoformat()
+                            if record.period_start
+                            else None
+                        ),
+                        "period_end": (
+                            record.period_end.isoformat() if record.period_end else None
+                        ),
                         "currency": record.currency,
                         "revenue": float(record.revenue) if record.revenue else 0.0,
                         "expenses": float(record.expenses) if record.expenses else 0.0,
-                        "net_profit": float(record.net_profit) if record.net_profit else 0.0,
+                        "net_profit": (
+                            float(record.net_profit) if record.net_profit else 0.0
+                        ),
                         "account_details": "",
                     }
                     results.append(record_dict)

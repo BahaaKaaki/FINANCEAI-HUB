@@ -48,7 +48,7 @@ __all__ = [
     "get_quarterly_performance",
     # Insight generation tools
     "generate_revenue_insights",
-    "generate_expense_insights", 
+    "generate_expense_insights",
     "generate_cash_flow_insights",
     "generate_seasonal_insights",
     "generate_comprehensive_insights",

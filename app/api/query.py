@@ -363,7 +363,6 @@ def _format_supporting_data(
     return supporting_data
 
 
-
 def _generate_fallback_response(query: str, error_message: str) -> str:
     """
     Generate a helpful fallback response when analysis fails.

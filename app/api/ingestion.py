@@ -72,7 +72,7 @@ async def ingest_file(request: IngestionRequest) -> FileProcessingResult:
 
     try:
         result = ingestion_service.ingest_file(request.file_path, request.source_type)
-        
+
         # Log the result
         logger.info(
             "File ingestion completed: %s, status=%s, records=%d",
@@ -85,9 +85,7 @@ async def ingest_file(request: IngestionRequest) -> FileProcessingResult:
 
     except Exception as e:
         logger.error("File ingestion failed: %s", str(e))
-        raise HTTPException(
-            status_code=500, detail=f"Ingestion failed: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Ingestion failed: {str(e)}")
 
 
 @router.post("/batch", response_model=BatchIngestionResult)
@@ -110,9 +108,7 @@ async def ingest_batch(request: BatchIngestionRequest) -> BatchIngestionResult:
         raise HTTPException(status_code=400, detail="No file paths provided")
 
     # Validate all files exist
-    missing_files = [
-        path for path in request.file_paths if not os.path.exists(path)
-    ]
+    missing_files = [path for path in request.file_paths if not os.path.exists(path)]
     if missing_files:
         raise HTTPException(
             status_code=404,
@@ -136,9 +132,7 @@ async def ingest_batch(request: BatchIngestionRequest) -> BatchIngestionResult:
 
     except Exception as e:
         logger.error("Batch ingestion failed: %s", str(e))
-        raise HTTPException(
-            status_code=500, detail=f"Batch ingestion failed: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Batch ingestion failed: {str(e)}")
 
 
 @router.post("/batch/async", response_model=Dict[str, str])
@@ -158,15 +152,15 @@ async def ingest_batch_async(
     Raises:
         HTTPException: If no files provided or validation fails
     """
-    logger.info("Received async batch ingestion request: %d files", len(request.file_paths))
+    logger.info(
+        "Received async batch ingestion request: %d files", len(request.file_paths)
+    )
 
     if not request.file_paths:
         raise HTTPException(status_code=400, detail="No file paths provided")
 
     # Validate all files exist
-    missing_files = [
-        path for path in request.file_paths if not os.path.exists(path)
-    ]
+    missing_files = [path for path in request.file_paths if not os.path.exists(path)]
     if missing_files:
         raise HTTPException(
             status_code=404,
@@ -175,6 +169,7 @@ async def ingest_batch_async(
 
     # Generate batch ID for tracking
     import uuid
+
     batch_id = str(uuid.uuid4())
 
     # Add batch processing to background tasks
@@ -218,15 +213,16 @@ async def upload_and_ingest(
         raise HTTPException(status_code=400, detail="No filename provided")
 
     # Validate file type (basic check)
-    if not file.filename.lower().endswith('.json'):
-        raise HTTPException(
-            status_code=400, detail="Only JSON files are supported"
-        )
+    if not file.filename.lower().endswith(".json"):
+        raise HTTPException(status_code=400, detail="Only JSON files are supported")
 
     try:
         # Save uploaded file temporarily
         import tempfile
-        with tempfile.NamedTemporaryFile(mode='wb', suffix='.json', delete=False) as temp_file:
+
+        with tempfile.NamedTemporaryFile(
+            mode="wb", suffix=".json", delete=False
+        ) as temp_file:
             content = await file.read()
             temp_file.write(content)
             temp_file_path = temp_file.name
@@ -234,7 +230,7 @@ async def upload_and_ingest(
         try:
             # Ingest the temporary file
             result = ingestion_service.ingest_file(temp_file_path, source_type)
-            
+
             # Update filename in result to use original filename
             result.filename = file.filename
 
@@ -281,9 +277,7 @@ async def get_ingestion_status(
         status_data = ingestion_service.get_ingestion_status(batch_id)
 
         if "error" in status_data:
-            raise HTTPException(
-                status_code=500, detail=status_data["error"]
-            )
+            raise HTTPException(status_code=500, detail=status_data["error"])
 
         return IngestionStatusResponse(
             status="success",
@@ -295,9 +289,7 @@ async def get_ingestion_status(
         raise
     except Exception as e:
         logger.error("Failed to get ingestion status: %s", str(e))
-        raise HTTPException(
-            status_code=500, detail=f"Failed to get status: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to get status: {str(e)}")
 
 
 @router.get("/health", response_model=Dict[str, Any])
@@ -311,10 +303,12 @@ async def health_check() -> Dict[str, Any]:
     try:
         # Test database connection
         from app.database.connection import check_database_connection
+
         db_healthy = check_database_connection()
 
         # Test file system access (check if we can create temp files)
         import tempfile
+
         fs_healthy = True
         try:
             with tempfile.NamedTemporaryFile() as temp_file:
@@ -369,7 +363,7 @@ async def _process_batch_async(
 
     try:
         result = ingestion_service.ingest_batch(file_paths, source_types)
-        
+
         logger.info(
             "Async batch processing completed: batch_id=%s, status=%s, successful=%d, failed=%d",
             batch_id,
@@ -384,7 +378,9 @@ async def _process_batch_async(
         # 3. Trigger downstream processes
 
     except Exception as e:
-        logger.error("Async batch processing failed: batch_id=%s, error=%s", batch_id, str(e))
+        logger.error(
+            "Async batch processing failed: batch_id=%s, error=%s", batch_id, str(e)
+        )
         # In a production system, we might want to:
         # 1. Store the error for later retrieval
         # 2. Send error notifications

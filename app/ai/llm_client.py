@@ -144,7 +144,6 @@ class LLMClient:
                 tokens_used=tokens_used,
             )
 
-
     def validate_configuration(self) -> bool:
         """
         Validate that the LLM client is properly configured.

@@ -5,7 +5,11 @@ from typing import Any, Dict, List, Optional
 from sqlalchemy import and_
 
 from app.ai.exceptions import DataNotFoundError, FinancialAnalysisError, ValidationError
-from app.ai.utils.validators import validate_date_range, validate_date_string, validate_source
+from app.ai.utils.validators import (
+    validate_date_range,
+    validate_date_string,
+    validate_source,
+)
 from app.core.logging import get_logger
 from app.database.connection import get_db_session
 from app.database.models import FinancialRecordDB

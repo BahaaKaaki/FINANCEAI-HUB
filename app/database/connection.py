@@ -8,7 +8,11 @@ from sqlalchemy.pool import StaticPool
 
 from app.core.config import get_settings
 from app.core.logging import get_logger
-from app.core.retry import retry_database_operation, DATABASE_RETRY_CONFIG, execute_with_retry
+from app.core.retry import (
+    retry_database_operation,
+    DATABASE_RETRY_CONFIG,
+    execute_with_retry,
+)
 from app.core.monitoring import record_database_operation, monitor_operation
 from app.database.models import Base
 
@@ -165,44 +169,40 @@ def get_db_session() -> Generator[Session, None, None]:
     """
     with monitor_operation("database.session", {"operation": "session_lifecycle"}):
         session_factory = get_session_factory()
-        
+
         def _create_session():
             return session_factory()
-        
+
         # Use retry logic for session creation
         session = execute_with_retry(
-            _create_session,
-            "database_session_creation",
-            DATABASE_RETRY_CONFIG
+            _create_session, "database_session_creation", DATABASE_RETRY_CONFIG
         )
 
         try:
             logger.debug("Database session created")
             yield session
-            
+
             # Commit with retry logic
             def _commit_session():
                 session.commit()
-                
+
             execute_with_retry(
-                _commit_session,
-                "database_session_commit",
-                DATABASE_RETRY_CONFIG
+                _commit_session, "database_session_commit", DATABASE_RETRY_CONFIG
             )
-            
+
             logger.debug("Database session committed successfully")
             record_database_operation("session_commit", 0, True)
-            
+
         except Exception as e:
             logger.error("Database session error, rolling back: %s", str(e))
-            
+
             try:
                 session.rollback()
                 record_database_operation("session_rollback", 0, True)
             except Exception as rollback_error:
                 logger.error("Failed to rollback session: %s", str(rollback_error))
                 record_database_operation("session_rollback", 0, False)
-            
+
             record_database_operation("session_commit", 0, False)
             raise
         finally:

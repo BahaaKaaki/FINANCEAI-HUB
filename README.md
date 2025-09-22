@@ -191,7 +191,7 @@ curl "http://localhost:8000/api/v1/financial-data?source=quickbooks&period_start
 - **Deployment Guide**: `RENDER_DEPLOYMENT_GUIDE.md`
 - **Provider Setup**: `PROVIDER_GUIDE.md`
 
-## 🚀 Deployment
+## Deployment
 
 ### **Local Development**
 ```bash

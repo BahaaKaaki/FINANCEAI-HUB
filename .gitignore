@@ -80,3 +80,6 @@ config/secrets/
 data/sensitive/
 uploads/
 downloads/private/
+
+# Kiro IDE files (local development only)
+.kiro/

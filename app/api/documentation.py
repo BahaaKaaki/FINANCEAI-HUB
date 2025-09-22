@@ -195,7 +195,7 @@ async def get_api_examples() -> List[APIExample]:
                     },
                     "monitoring": {
                         "status": "healthy",
-                        "message": "Circuit breakers removed for simplification"
+                        "message": "Monitoring system operational"
                     }
                 }
             },
@@ -689,7 +689,7 @@ async def get_api_reference() -> str:
             <h3>Health & Monitoring</h3>
             <div class="endpoint">
                 <span class="method get">GET</span><code>/api/v1/health</code>
-                <p>Comprehensive system health check including database, AI services, and circuit breakers.</p>
+                <p>Comprehensive system health check including database and AI services.</p>
             </div>
             
             <div class="endpoint">

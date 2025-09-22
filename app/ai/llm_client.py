@@ -21,10 +21,8 @@ class LLMClient:
     def __init__(self):
         self.settings = get_settings()
         self._provider = None
-        # Circuit breaker removed
-        self._initialize_provider()
 
-    # Circuit breaker initialization removed
+        self._initialize_provider()
 
     def _initialize_provider(self):
         """Initialize the appropriate LLM provider based on configuration."""
@@ -82,8 +80,6 @@ class LLMClient:
                 f"Provider initialization failed: {str(e)}"
             ) from e
 
-    # Circuit breaker initialization method removed for simplification
-
     def chat_completion(
         self,
         messages: List[Dict[str, str]],
@@ -114,7 +110,7 @@ class LLMClient:
         tokens_used = None
 
         try:
-            # Direct LLM API call (circuit breaker removed for simplification)
+            # Direct LLM API call
             result = self._provider.chat_completion(
                 messages=messages,
                 tools=tools,
@@ -128,8 +124,6 @@ class LLMClient:
                 tokens_used = getattr(result.usage, "total_tokens", None)
 
             return result
-
-        # Circuit breaker exception handling removed
 
         except Exception as e:
             # Check if it's an API key error and fall back to mock mode

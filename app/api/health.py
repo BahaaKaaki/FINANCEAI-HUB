@@ -32,7 +32,7 @@ class SystemMetrics(BaseModel):
     performance_metrics: Dict[str, Any] = Field(
         ..., description="Performance metrics summary"
     )
-    # circuit_breakers: Dict[str, Any] = Field(..., description="Circuit breaker status")  # Removed
+
     alerts: List[Dict[str, Any]] = Field(..., description="Active alerts")
 
 
@@ -59,38 +59,7 @@ async def health_check():
     Performs health checks on all system components including:
     - Database connectivity and performance
     - LLM service availability and configuration
-    - Circuit breaker status and statistics
     - System resources and performance metrics
-    - Cache status and hit rates
-    - Background service health
-
-    **Example Response:**
-    ```json
-    {
-        "status": "healthy",
-        "timestamp": 1704067200.123,
-        "version": "1.0.0",
-        "uptime_seconds": 3600.0,
-        "checks": {
-            "database": {
-                "status": "healthy",
-                "duration_ms": 15.2,
-                "details": {
-                    "connection_pool_size": 10,
-                    "active_connections": 2,
-                    "database_size_mb": 45.6
-                }
-            },
-            "llm_service": {
-                "status": "healthy",
-                "duration_ms": 120.5,
-                "provider": "openai",
-                "model": "gpt-4",
-                "configured": true
-            }
-        }
-    }
-    ```
 
     **Status Values:**
     - `healthy`: All systems operational
@@ -100,80 +69,226 @@ async def health_check():
     Returns:
         HealthStatus with overall status and component details
     """
-    # Simplified comprehensive health check to avoid timeouts
-    import time
+    checks = {}
+    overall_status = "healthy"
+
+    # Database health check
+    db_start = time.time()
+    try:
+        db_healthy = check_database_connection()
+        db_duration = (time.time() - db_start) * 1000
+
+        if db_healthy:
+            db_info = get_database_info()
+            checks["database"] = {
+                "status": "healthy",
+                "duration_ms": round(db_duration, 2),
+                "details": db_info,
+            }
+        else:
+            checks["database"] = {
+                "status": "unhealthy",
+                "duration_ms": round(db_duration, 2),
+                "message": "Database connection failed",
+            }
+            overall_status = "unhealthy"
+    except Exception as e:
+        db_duration = (time.time() - db_start) * 1000
+        checks["database"] = {
+            "status": "unhealthy",
+            "duration_ms": round(db_duration, 2),
+            "message": f"Database check error: {str(e)}",
+        }
+        overall_status = "unhealthy"
+
+    # LLM service health check
+    llm_start = time.time()
+    try:
+        llm_client = get_llm_client()
+        llm_configured = llm_client.validate_configuration()
+        llm_duration = (time.time() - llm_start) * 1000
+
+        if llm_configured:
+            checks["llm_service"] = {
+                "status": "healthy",
+                "duration_ms": round(llm_duration, 2),
+                "configured": True,
+                "provider": "configured",
+            }
+        else:
+            checks["llm_service"] = {
+                "status": "degraded",
+                "duration_ms": round(llm_duration, 2),
+                "configured": False,
+                "message": "LLM service not configured (API keys missing)",
+            }
+            if overall_status == "healthy":
+                overall_status = "degraded"
+    except Exception as e:
+        llm_duration = (time.time() - llm_start) * 1000
+        checks["llm_service"] = {
+            "status": "unhealthy",
+            "duration_ms": round(llm_duration, 2),
+            "message": f"LLM service check error: {str(e)}",
+        }
+        overall_status = "unhealthy"
+
+    # Monitoring system health check
+    monitoring_start = time.time()
+    try:
+        monitor = get_performance_monitor()
+        monitoring_duration = (time.time() - monitoring_start) * 1000
+
+        checks["monitoring"] = {
+            "status": "healthy",
+            "duration_ms": round(monitoring_duration, 2),
+            "message": "Performance monitoring active",
+        }
+    except Exception as e:
+        monitoring_duration = (time.time() - monitoring_start) * 1000
+        checks["monitoring"] = {
+            "status": "degraded",
+            "duration_ms": round(monitoring_duration, 2),
+            "message": f"Monitoring system issue: {str(e)}",
+        }
+        if overall_status == "healthy":
+            overall_status = "degraded"
 
     return {
-        "status": "healthy",
+        "status": overall_status,
         "timestamp": time.time(),
         "version": "1.0.0",
-        "uptime_seconds": 0,
-        "checks": {
-            "database": {
-                "status": "healthy",
-                "message": "Database checks simplified to avoid timeouts",
-            },
-            "llm_service": {
-                "status": "healthy",
-                "message": "LLM checks simplified to avoid timeouts",
-            },
-            "monitoring": {
-                "status": "healthy",
-                "message": "Monitoring simplified to avoid timeouts",
-            },
-        },
-        "message": "All health checks simplified for better performance",
+        "uptime_seconds": 0,  # Could be calculated from app start time
+        "checks": checks,
     }
 
 
 @router.get("/metrics")
 async def get_system_metrics():
     """
-    Get simplified system metrics to avoid timeouts.
+    Get system metrics and performance data.
     """
-    import time
+    try:
+        monitor = get_performance_monitor()
 
-    return {
-        "timestamp": time.time(),
-        "system_status": {
-            "status": "healthy",
-            "message": "Metrics simplified to avoid timeouts",
-        },
-        "performance_metrics": {"message": "Detailed metrics disabled for performance"},
-        "circuit_breakers": {},
-        "alerts": [],
-        "note": "Metrics system simplified to resolve timeout issues",
-    }
+        # Get basic system status
+        db_healthy = check_database_connection()
+        llm_client = get_llm_client()
+        llm_configured = llm_client.validate_configuration()
+
+        system_status = "healthy"
+        if not db_healthy:
+            system_status = "unhealthy"
+        elif not llm_configured:
+            system_status = "degraded"
+
+        # Get performance metrics (simplified to avoid timeouts)
+        performance_metrics = {
+            "database_healthy": db_healthy,
+            "llm_configured": llm_configured,
+            "monitoring_active": True,
+        }
+
+        return {
+            "timestamp": time.time(),
+            "system_status": {
+                "status": system_status,
+                "database": "healthy" if db_healthy else "unhealthy",
+                "llm_service": "healthy" if llm_configured else "degraded",
+            },
+            "performance_metrics": performance_metrics,
+            "alerts": [],  # Could be populated with actual alerts
+        }
+
+    except Exception as e:
+        logger.error("Error getting system metrics: %s", str(e))
+        return {
+            "timestamp": time.time(),
+            "system_status": {
+                "status": "unhealthy",
+                "message": f"Metrics collection error: {str(e)}",
+            },
+            "performance_metrics": {"error": "Metrics unavailable"},
+            "alerts": [{"type": "error", "message": "Metrics collection failed"}],
+        }
 
 
 @router.get("/health/database")
 async def database_health() -> Dict[str, Any]:
     """
-    Simplified database health check to avoid timeouts.
+    Detailed database health check.
     """
-    import time
+    start_time = time.time()
 
-    return {
-        "status": "healthy",
-        "duration_ms": 0,
-        "message": "Database health check simplified to avoid timeouts",
-        "timestamp": time.time(),
-    }
+    try:
+        # Check database connection
+        is_healthy = check_database_connection()
+        duration_ms = (time.time() - start_time) * 1000
+
+        if is_healthy:
+            # Get additional database info
+            db_info = get_database_info()
+            return {
+                "status": "healthy",
+                "duration_ms": round(duration_ms, 2),
+                "timestamp": time.time(),
+                "details": db_info,
+            }
+        else:
+            return {
+                "status": "unhealthy",
+                "duration_ms": round(duration_ms, 2),
+                "timestamp": time.time(),
+                "message": "Database connection failed",
+            }
+
+    except Exception as e:
+        duration_ms = (time.time() - start_time) * 1000
+        logger.error("Database health check error: %s", str(e))
+        return {
+            "status": "unhealthy",
+            "duration_ms": round(duration_ms, 2),
+            "timestamp": time.time(),
+            "message": f"Database health check error: {str(e)}",
+        }
 
 
 @router.get("/health/llm")
 async def llm_service_health() -> Dict[str, Any]:
     """
-    Simplified LLM service health check to avoid timeouts.
+    Detailed LLM service health check.
     """
-    import time
+    start_time = time.time()
 
-    return {
-        "status": "healthy",
-        "duration_ms": 0,
-        "message": "LLM health check simplified to avoid timeouts",
-        "timestamp": time.time(),
-    }
+    try:
+        # Check LLM service configuration
+        llm_client = get_llm_client()
+        is_configured = llm_client.validate_configuration()
+        duration_ms = (time.time() - start_time) * 1000
 
+        if is_configured:
+            return {
+                "status": "healthy",
+                "duration_ms": round(duration_ms, 2),
+                "timestamp": time.time(),
+                "configured": True,
+                "provider": "configured",
+            }
+        else:
+            return {
+                "status": "degraded",
+                "duration_ms": round(duration_ms, 2),
+                "timestamp": time.time(),
+                "configured": False,
+                "message": "LLM service not configured (API keys missing)",
+            }
 
-# Circuit breaker reset endpoint removed for simplification
+    except Exception as e:
+        duration_ms = (time.time() - start_time) * 1000
+        logger.error("LLM service health check error: %s", str(e))
+        return {
+            "status": "unhealthy",
+            "duration_ms": round(duration_ms, 2),
+            "timestamp": time.time(),
+            "message": f"LLM service health check error: {str(e)}",
+        }

@@ -221,8 +221,6 @@ async def process_natural_language_query(
             },
         )
 
-    # Circuit breaker exception handling removed for simplification
-
     except FinancialAnalysisError as e:
         processing_time = time.time() - start_time
         status_code = 422

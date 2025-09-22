@@ -96,7 +96,7 @@
   ],
   "item": [
     {
-      "name": "\u2764\ufe0f Health & Monitoring",
+      "name": "Health & Monitoring",
       "description": "System health checks and monitoring endpoints",
       "item": [
         {
@@ -264,7 +264,7 @@
       ]
     },
     {
-      "name": "\ud83c\udfaf Natural Language AI Queries (MANDATORY)",
+      "name": "Natural Language AI Queries",
       "description": "AI-powered natural language processing for financial queries - Core Assignment Feature A",
       "item": [
         {
@@ -455,7 +455,7 @@
       ]
     },
     {
-      "name": "\ud83d\udcca Financial Data",
+      "name": "Financial Data",
       "description": "Access to structured financial records and accounts",
       "item": [
         {
@@ -558,7 +558,7 @@
       ]
     },
     {
-      "name": "\ud83d\udce5 Data Ingestion",
+      "name": "Data Ingestion",
       "description": "Endpoints for ingesting and processing financial data from QuickBooks and RootFi sources",
       "item": [
         {
@@ -757,7 +757,7 @@
       ]
     },
     {
-      "name": "\ud83e\udde0 AI Insights & Analytics (OPTIONAL B)",
+      "name": "AI Insights & Analytics",
       "description": "AI-generated insights and business recommendations - Optional Assignment Feature B",
       "item": [
         {
